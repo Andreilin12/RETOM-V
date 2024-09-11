@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agregar Negocio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c3e50;
+    }
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .form-section h2 {
+      margin-top: 0;
+    }
+    form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    form input, form button {
+      display: block;
+      width: 99%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    form button {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #218838;
+    }
+    h2 {
+      color: #fff;
+    }
+
+     /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+* {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* estándar */
+
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* estándar */
+ } 
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RETOM | PLAYA PALMERA</h1>
+  </header>
+  <main>
+    <section class="form-section">
+      <h2>Agregar Negocio</h2>
+      <form id="addBusinessForm">
+        <label for="businessName">Nombre del Negocio:</label>
+        <input type="text" id="businessName" required>
+        <button type="submit">Agregar Negocio</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
+    authDomain: "almacem-1.firebaseapp.com",
+    projectId: "almacem-1",
+    storageBucket: "almacem-1.appspot.com",
+    messagingSenderId: "522733154511",
+    appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("addBusinessForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const businessName = document.getElementById("businessName").value.trim();
+      if (businessName) {
+        const docRef = doc(db, "businesses", businessName);
+        await setDoc(docRef, { name: businessName });
+        document.getElementById("businessName").value = "";
+        alert("Negocio agregado con éxito");
+      }
+    });
+  </script>
+</body>
+</html>

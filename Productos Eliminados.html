@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos Eliminados</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2c3e50;
+    }
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+    }
+    .accordion {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .accordion-header {
+      padding: 15px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 5px 5px 0 0;
+    }
+    .accordion-content {
+      display: none;
+      padding: 15px;
+    }
+    .product {
+      margin-bottom: 10px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .product img {
+      max-width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .product p {
+      margin: 0;
+    }
+    .low-stock {
+      color: red;
+      font-weight: bold;
+    }
+    h2 {
+      color: #fff;
+    }
+
+     /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+  * {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* estándar */
+
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* estándar */
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Productos Eliminados</h1>
+  </header>
+  <main>
+    <section id="deletedProductsSection">
+      <h2>Productos Eliminados</h2>
+      <!-- Los productos eliminados se agregarán aquí dinámicamente -->
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
+    authDomain: "almacem-1.firebaseapp.com",
+    projectId: "almacem-1",
+    storageBucket: "almacem-1.appspot.com",
+    messagingSenderId: "522733154511",
+    appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadDeletedProducts() {
+      const deletedProductsRef = collection(db, "deletedProducts");
+      const deletedProductsQuerySnapshot = await getDocs(deletedProductsRef);
+      const deletedProductsSection = document.getElementById("deletedProductsSection");
+      deletedProductsSection.innerHTML = "";
+
+      deletedProductsQuerySnapshot.forEach((doc) => {
+        const productData = doc.data();
+        const productDiv = document.createElement("div");
+        productDiv.classList.add("product");
+
+        if (productData.imageUrl) {
+          const img = document.createElement("img");
+          img.src = productData.imageUrl;
+          productDiv.appendChild(img);
+        }
+
+        const namePara = document.createElement("p");
+        namePara.textContent = `Nombre: ${productData.name}`;
+        productDiv.appendChild(namePara);
+
+        const businessPara = document.createElement("p");
+        businessPara.textContent = `Negocio: ${productData.businessName}`;
+        productDiv.appendChild(businessPara);
+
+        const deletedDatePara = document.createElement("p");
+        deletedDatePara.textContent = `Fecha de Eliminación: ${new Date(productData.deletedDate).toLocaleString()}`;
+        productDiv.appendChild(deletedDatePara);
+
+        deletedProductsSection.appendChild(productDiv);
+      });
+    }
+
+    loadDeletedProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Imágenes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2C3E50;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .settings {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .settings h2 {
+            margin-top: 0;
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .settings label {
+            display: block;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        .settings button {
+            background-color: #06ac2a;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .settings button:hover {
+            background-color: #218838;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #218838;
+            text-decoration: none;
+        }
+
+   /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+ * {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* estándar */
+
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* estándar */
+   }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CONFIGURACIÓN DEL BUSCADOR</h1>
+</header>
+
+<div class="container">
+    <div class="settings">
+        <h2>Mostrar Imágenes</h2>
+        <label>
+            <input type="checkbox" id="toggleImages">
+            Activar Imágenes
+        </label>
+        <button id="saveSettingsButton">Guardar Configuración</button>
+        <a href="file:///C:/mi-proyecto-electron/dist/MiApp-win32-x64/resources/app/home.html.html" class="back-link">Volver a la Página Principal</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
+    authDomain: "almacem-1.firebaseapp.com",
+    projectId: "almacem-1",
+    storageBucket: "almacem-1.appspot.com",
+    messagingSenderId: "522733154511",
+    appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadSettings() {
+        const settingsSnapshot = await getDocs(collection(db, "settings"));
+        const settings = settingsSnapshot.docs.map(doc => doc.data());
+        if (settings.length > 0) {
+            document.getElementById('toggleImages').checked = settings[0].showImages !== false;
+        }
+    }
+
+    document.getElementById('saveSettingsButton').addEventListener('click', async () => {
+        const showImages = document.getElementById('toggleImages').checked;
+        await setDoc(doc(db, "settings", "default"), { showImages });
+        alert('Configuración guardada');
+    });
+
+    loadSettings();
+</script>
+
+</body>
+</html>

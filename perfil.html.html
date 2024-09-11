@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #2c3e50;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .profile-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            position: relative;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .profile-pic:hover {
+            transform: scale(1.1);
+        }
+        .profile-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .profile-position, .profile-department, .profile-phone, .profile-email {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .edit-btn, .change-password-btn, .save-btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        .edit-btn:hover, .change-password-btn:hover, .save-btn:hover {
+            background-color: #0056b3;
+        }
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .actions button {
+            width: 48%;
+        }
+        .edit-form, .change-password-form {
+            display: none;
+        }
+        .edit-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .modal-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .modal-content button {
+            margin-top: 10px;
+        }
+        .modal-content .close-btn {
+            background: red;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+
+    /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+* {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* estándar */
+
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* estándar */
+ }
+
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <img src="https://firebasestorage.googleapis.com/v0/b/rrhh-ee7e3.appspot.com/o/logo%2Fimages%20(1).png?alt=media&token=e71735a8-036a-47d0-bac5-333928017c79" alt="Foto de Perfil" class="profile-pic" id="profilePic" onclick="openModal();">
+    <h2 class="profile-name" id="profileName">Nombre Completo</h2>
+    <p class="profile-position" id="profilePosition">Posición Laboral</p>
+    <p class="profile-department" id="profileDepartment">Departamento</p>
+    <p class="profile-phone" id="profilePhone">Teléfono/Flota</p>
+    <p class="profile-email" id="profileEmail">Correo Electrónico</p>
+
+    <div class="edit-form" id="editForm">
+        <input type="text" id="editName" placeholder="Editar Nombre Completo">
+        <input type="tel" id="editPhone" placeholder="Editar Teléfono/Flota">
+        <input type="file" id="editPhoto" accept="image/*" onchange="previewNewProfilePicture()">
+        <button class="save-btn" onclick="saveProfile()">Guardar Cambios</button>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <img src="default-profile.png" alt="Vista Previa" id="modalImage">
+            <input type="file" id="modalPhoto" accept="image/*" onchange="updateModalPreview()">
+            <button class="save-btn" onclick="saveNewProfilePicture()">Guardar Imagen</button>
+            <button class="close-btn" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="change-password-form" id="changePasswordForm">
+        <input type="password" id="newPassword" placeholder="Nueva Contraseña">
+        <input type="password" id="confirmPassword" placeholder="Confirmar Contraseña">
+        <button class="save-btn" onclick="changePassword()">Guardar Contraseña</button>
+    </div> 
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
+    authDomain: "almacem-1.firebaseapp.com",
+    projectId: "almacem-1",
+    storageBucket: "almacem-1.appspot.com",
+    messagingSenderId: "522733154511",
+    appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
+  };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Mostrar información del usuario
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                document.getElementById('profileName').textContent = userData.name || 'Nombre Completo';
+                document.getElementById('profilePosition').textContent = userData.position || 'Posición Laboral';
+                document.getElementById('profileDepartment').textContent = userData.department || 'Departamento';
+                document.getElementById('profilePhone').textContent = userData.phone || 'Teléfono/Flota';
+                document.getElementById('profileEmail').textContent = user.email || 'Correo Electrónico';
+
+                if (userData.photoURL) {
+                    try {
+                        const profilePicUrl = await getDownloadURL(ref(storage, userData.photoURL));
+                        document.getElementById('profilePic').src = profilePicUrl;
+                    } catch (error) {
+                        console.error("Error al obtener la URL de la imagen de perfil:", error);
+                    }
+                }
+            } else {
+                console.error("No se encontró el documento del usuario en Firestore.");
+            }
+        } else {
+            console.log("No hay usuario autenticado.");
+        }
+    });
+
+    function saveProfile() {
+        const name = document.getElementById('editName').value;
+        const phone = document.getElementById('editPhone').value;
+        const user = auth.currentUser;
+
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid);
+            setDoc(userDocRef, { name, phone }, { merge: true })
+                .then(() => {
+                    console.log("Perfil guardado exitosamente.");
+                })
+                .catch((error) => {
+                    console.error("Error al guardar el perfil:", error);
+                });
+        }
+    }
+
+    function changePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword === confirmPassword) {
+            const user = auth.currentUser;
+            if (user) {
+                updatePassword(user, newPassword)
+                    .then(() => {
+                        console.log("Contraseña cambiada exitosamente.");
+                    })
+                    .catch((error) => {
+                        console.error("Error al cambiar la contraseña:", error);
+                    });
+            }
+        } else {
+            console.error("Las contraseñas no coinciden.");
+        }
+    }
+
+    function openModal() {
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function updateModalPreview() {
+        const file = document.getElementById('modalPhoto').files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('modalImage').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function saveNewProfilePicture() {
+        const file = document.getElementById('modalPhoto').files[0];
+        if (file) {
+            const user = auth.currentUser;
+            if (user) {
+                const storageRef = ref(storage, `profilePictures/${user.uid}/${file.name}`);
+                uploadBytes(storageRef, file)
+                    .then(() => {
+                        return getDownloadURL(storageRef);
+                    })
+                    .then((downloadURL) => {
+                        const userDocRef = doc(db, "users", user.uid);
+                        setDoc(userDocRef, { photoURL: `profilePictures/${user.uid}/${file.name}` }, { merge: true })
+                            .then(() => {
+                                console.log("Foto de perfil actualizada exitosamente.");
+                                closeModal();
+                            })
+                            .catch((error) => {
+                                console.error("Error al actualizar la foto de perfil:", error);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error("Error al subir la foto de perfil:", error);
+                    });
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
