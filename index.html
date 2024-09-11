@@ -148,7 +148,7 @@
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 // Iniciar sesión exitosa
-                window.location.href = "file:///C:/mi-proyecto-electron/dist/MiApp-win32-x64/resources/app/home.html.html"; // Redirigir a la página principal
+                window.location.href = "home.html"; // Redirigir a la página principal
             })
             .catch((error) => {
                 console.error(error);
