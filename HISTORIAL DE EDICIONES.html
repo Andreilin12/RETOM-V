@@ -140,8 +140,8 @@
           const productName = data.productName || "Sin nombre de producto";
           const quantity = data.quantity || "Sin cantidad";
           const editDate = data.editDate ? new Date(data.editDate).toLocaleString() : "Sin fecha";
-          const addedBy = data.users?.name || "Desconocido"; // Asegura que 'users' y 'name' existan
-          const lastEditedBy = data.lastEditedBy || "Desconocido";
+          const addedBy = data.userName || "Desconocido"; // Asegura que 'users' y 'name' existan
+          const lastEditedBy = data.editedBy || "Desconocido";
 
           card.innerHTML = `
             <h3>${businessName}</h3>
