@@ -11,41 +11,46 @@
       margin: 0;
       padding: 0;
       background-color: #2c3e50;
+      color: #2c3e50;
     }
     header {
       background-color: #2c3e50;
       color: #fff;
-      padding: 10px 0;
+      padding: 20px;
       text-align: center;
+      font-size: 1.5em;
     }
     main {
       padding: 20px;
+      max-width: 1200px;
+      margin: auto;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse; 
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       margin-bottom: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    table, th, td {
-      border: 1px solid #ddd;
-      color: #fff;
+    .card h3 {
+      margin: 0;
+      color: #2980b9;
     }
-    th, td {
-      padding: 10px;
-      text-align: left;
+    .card p {
+      margin: 5px 0;
     }
-    th { 
-      background-color: #4CAF50;
-      color: #fff;
-    }
-    tr:nth-child(even) {
-      background-color: transparent;
+    .label {
+      font-weight: bold;
+      color: #34495e;
     }
     .alert {
       position: fixed;
       top: 20px;
       right: 20px;
-      background: #dc3545;
+      background: #e74c3c;
       color: #fff;
       padding: 15px;
       border-radius: 5px;
@@ -54,7 +59,7 @@
       width: 300px;
       max-height: 400px;
       overflow-y: auto;
-      display: none; /* Inicialmente oculta */
+      display: none;
     }
     .alert.show {
       display: block;
@@ -63,12 +68,12 @@
       margin-bottom: 20px;
       display: flex;
       gap: 10px;
-      color: #fff;
     }
     .filters input {
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 5px;
+      width: 300px;
     }
   </style>
 </head>
@@ -81,21 +86,9 @@
     <div class="filters">
       <input type="text" id="searchBusinessName" placeholder="Buscar por nombre de negocio">
       <input type="text" id="searchProductName" placeholder="Buscar por nombre de producto">
-      <input type="date" id="searchDate" placeholder="Buscar por fecha">
     </div>
     
-    <table id="historyTable">
-      <thead>
-        <tr>
-          <th>Nombre del Negocio</th>
-          <th>Nombre del Producto</th>
-          <th>Cantidad</th>
-          <th>Fecha y Hora</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    <div id="historyContainer"></div>
     <div id="alert" class="alert"></div>
   </main>
 
@@ -104,12 +97,13 @@
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
-     apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
-    authDomain: "almacem-1.firebaseapp.com",
-    projectId: "almacem-1",
-    storageBucket: "almacem-1.appspot.com",
-    messagingSenderId: "522733154511",
-    appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
+    apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+    authDomain: "inventario-35d6b.firebaseapp.com",
+    databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+    projectId: "inventario-35d6b",
+    storageBucket: "inventario-35d6b.appspot.com",
+    messagingSenderId: "266100399659",
+    appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
   };
 
     const app = initializeApp(firebaseConfig);
@@ -117,19 +111,19 @@
 
     function showAlert(alertContent) {
       const alert = document.getElementById("alert");
-      alert.innerHTML = alertContent; 
+      alert.innerHTML = alertContent;
       alert.classList.add("show");
 
       setTimeout(() => {
         alert.classList.remove("show");
-      }, 7000); // Muestra la alerta por 7 segundos
+      }, 7000);
     }
 
     function loadHistory() {
-      const historyTableBody = document.getElementById("historyTable").getElementsByTagName("tbody")[0];
+      const historyContainer = document.getElementById("historyContainer");
 
       onSnapshot(collection(db, "productsHistory"), (snapshot) => {
-        historyTableBody.innerHTML = "";  // Limpiar la tabla antes de cargar nuevos datos
+        historyContainer.innerHTML = "";  // Limpiar antes de cargar nuevos datos
 
         if (snapshot.empty) {
           showAlert('No hay datos en el historial.');
@@ -138,52 +132,58 @@
 
         snapshot.forEach((doc) => {
           const data = doc.data();
-          const row = historyTableBody.insertRow();
+          const card = document.createElement('div');
+          card.classList.add('card');
 
-          const cellBusinessName = row.insertCell(0);
-          const cellProductName = row.insertCell(1);
-          const cellQuantity = row.insertCell(2);
-          const cellTimestamp = row.insertCell(3);
+          // Comprobamos si los datos existen antes de mostrarlos
+          const businessName = data.businessName || "Sin nombre de negocio";
+          const productName = data.productName || "Sin nombre de producto";
+          const quantity = data.quantity || "Sin cantidad";
+          const editDate = data.editDate ? new Date(data.editDate).toLocaleString() : "Sin fecha";
+          const addedBy = data.users?.name || "Desconocido"; // Asegura que 'users' y 'name' existan
+          const lastEditedBy = data.lastEditedBy || "Desconocido";
 
-          cellBusinessName.textContent = data.businessName;
-          cellProductName.textContent = data.productName;
-          cellQuantity.textContent = data.quantity;
-          cellTimestamp.textContent = new Date(data.editedDate).toLocaleString();
+          card.innerHTML = `
+            <h3>${businessName}</h3>
+            <p><span class="label">Producto:</span> ${productName}</p>
+            <p><span class="label">Cantidad:</span> ${quantity}</p>
+            <p><span class="label">Fecha y Hora:</span> ${editDate}</p>
+            <p><span class="label">Agregado por:</span> ${addedBy}</p>
+            <p><span class="label">Editado por última vez por:</span> ${lastEditedBy}</p>
+          `;
+
+          historyContainer.appendChild(card);
         });
+
+        // Aplicar filtros después de cargar los datos
+        filterHistory();
       });
     }
 
-    // Función para filtrar los resultados
+    // Función para filtrar el historial
     function filterHistory() {
       const businessName = document.getElementById("searchBusinessName").value.toLowerCase();
       const productName = document.getElementById("searchProductName").value.toLowerCase();
-      const searchDate = document.getElementById("searchDate").value;
+      const cards = document.querySelectorAll('.card');
 
-      const historyTableBody = document.getElementById("historyTable").getElementsByTagName("tbody")[0];
-      const rows = historyTableBody.getElementsByTagName("tr");
+      cards.forEach(card => {
+        const businessNameText = card.querySelector('h3').textContent.toLowerCase();
+        const productNameText = card.querySelector('p:nth-of-type(1)').textContent.toLowerCase();
 
-      for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName("td");
-        const cellBusinessName = cells[0].textContent.toLowerCase();
-        const cellProductName = cells[1].textContent.toLowerCase();
-        const cellTimestamp = cells[3].textContent;
+        const businessMatch = !businessName || businessNameText.includes(businessName);
+        const productMatch = !productName || productNameText.includes(productName);
 
-        const dateMatch = !searchDate || cellTimestamp.includes(searchDate);
-        const businessNameMatch = !businessName || cellBusinessName.includes(businessName);
-        const productNameMatch = !productName || cellProductName.includes(productName);
-
-        if (dateMatch && businessNameMatch && productNameMatch) {
-          rows[i].style.display = "";
+        if (businessMatch && productMatch) {
+          card.style.display = 'block';
         } else {
-          rows[i].style.display = "none";
+          card.style.display = 'none';
         }
-      }
+      });
     }
 
-    // Eventos para filtrar mientras se escribe o se selecciona una fecha
+    // Eventos de búsqueda
     document.getElementById("searchBusinessName").addEventListener("input", filterHistory);
     document.getElementById("searchProductName").addEventListener("input", filterHistory);
-    document.getElementById("searchDate").addEventListener("input", filterHistory);
 
     loadHistory();
   </script>
