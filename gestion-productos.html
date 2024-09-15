@@ -136,10 +136,41 @@
     h2 {
       color: #fff;
     }
+
+
+    .back-button {
+    position: fixed;
+    top: 10px; /* Distancia desde la parte superior */
+    left: 10px; /* Distancia desde el borde izquierdo */
+    background-color: #16a085; /* Color de fondo */
+    color: #fff; /* Color del texto y del icono */
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s; /* Transición suave para el color de fondo */
+    z-index: 1000; /* Asegura que el botón esté sobre otros elementos */
+}
+
+.back-button i {
+    margin-right: 8px; /* Espacio entre el icono y el texto */
+}
+
+.back-button:hover {
+    background-color: #2c2e50; /* Color de fondo al pasar el ratón */
+}
   </style>
 </head>
 <body>
   <header>
+
+        <button class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> Volver
+    </button>
+
     <h1>Gestionar Productos</h1>
   </header>
   <main>
@@ -147,14 +178,14 @@
       <div class="search-container">
         <input type="text" id="searchName" placeholder="Buscar por nombre">
         <input type="text" id="searchCode" placeholder="Buscar por código">
-        <input type="text" id="searchEAN" placeholder="Buscar por EAN/UPC">
+       <input type="text" id="searchEAN" placeholder="Buscar por EAN/UPC">
       </div>
 
       <section id="productsSection" class="products-section">
         <h2>Productos</h2>
       </section>
     </section>
-  </main>
+  </main> 
 
   <div id="alert" class="alert"></div>
 
@@ -499,3 +530,13 @@
   </script>
 </body>
 </html>
+
+
+
+    <!-- Incluye FontAwesome CDN para los iconos -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
