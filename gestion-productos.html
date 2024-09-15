@@ -243,7 +243,7 @@
               <p>Tipo de Producto: ${productData.type || 'N/A'}</p>
               <p>Descripción: ${productData.description || 'N/A'}</p>
               <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p>
-              <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.quantity || 'N/A'}</p>
+              <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}</p>
               <p>Precio por Unidad: ${productData.pricePerUnit || 'N/A'}</p>
               <p>Precio por Paquete: ${productData.pricePerPackage || 'N/A'}</p>
               <p>Precio por Fardo: ${productData.pricePerBale || 'N/A'}</p>
@@ -313,7 +313,7 @@
             editForm.appendChild(editLowStockThreshold);
 
             // Campo: Cambiar precio
-            const editPriceLabel = document.createElement("label");
+            const editPriceLabel = document.createElement("label"); 
             editPriceLabel.textContent = "Cambiar precio $DOP:";
             const editPriceInput = document.createElement("input");
             editPriceInput.type = "number";
@@ -434,7 +434,7 @@
 
       setTimeout(() => {
         alertBox.classList.remove("show");
-      }, 5000);
+      }, 12000); 
     }
 
     function checkAlerts() {
@@ -453,7 +453,7 @@
             const daysUntilExpiration = (expirationDate - currentDate) / (1000 * 60 * 60 * 24);
 
             if (productData.quantity <= productData.lowStockThreshold) {
-              lowStockProducts += `<li>${productData.name} - ${productData.unit}</li>`;
+              lowStockProducts += `<li>${productData.name} - ${productData.quantity}</li>`;
             }
 
             if (daysUntilExpiration <= 30) {
