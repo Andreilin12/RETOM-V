@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Productos</title>
+  <title>Gestionar Productos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
@@ -24,31 +24,17 @@
     .form-section {
       margin-bottom: 20px;
     }
-    .form-section h2 {
-      margin-top: 0;
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
     }
-    form {
-      background: #fff;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    form input, form select, form button {
-      display: block;
+    .search-container input {
       width: 100%;
-      margin-bottom: 10px;
+      max-width: 150px;
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 5px;
-    }
-    form button {
-      background-color: #28a745;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    form button:hover {
-      background-color: #218838;
     }
     .accordion {
       background-color: #fff;
@@ -88,14 +74,19 @@
       color: red;
       font-weight: bold;
     }
+    .expiration-warning {
+      color: orange;
+    }
     .edit-form {
       display: none;
       align-items: center;
       margin-bottom: 10px;
+      flex-direction: column;
     }
-    .edit-form input {
-      width: auto;
-      margin-right: 10px;
+    .edit-form input, .edit-form label, .edit-form select {
+      width: 100%;
+      max-width: 250px;
+      margin-bottom: 10px;
     }
     .btn {
       background-color: #007bff;
@@ -152,77 +143,55 @@
     <h1>Gestionar Productos</h1>
   </header>
   <main>
-    <section id="productsSection" class="products-section">
-      <h2>Productos</h2>
+    <section class="form-section">
+      <div class="search-container">
+        <input type="text" id="searchName" placeholder="Buscar por nombre">
+        <input type="text" id="searchCode" placeholder="Buscar por código">
+        <input type="text" id="searchEAN" placeholder="Buscar por EAN/UPC">
+      </div>
+
+      <section id="productsSection" class="products-section">
+        <h2>Productos</h2>
+      </section>
     </section>
   </main>
 
-  <!-- Alerta de productos casi agotados -->
   <div id="alert" class="alert"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-    import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDNgXM2F759meUXVi_QW6JeSitg6IC4KUg",
-      authDomain: "almacem-1.firebaseapp.com",
-      projectId: "almacem-1",
-      storageBucket: "almacem-1.appspot.com",
-      messagingSenderId: "522733154511",
-      appId: "1:522733154511:web:3151536bdf2622d4ddc7ba"
-    };
+    apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+    authDomain: "inventario-35d6b.firebaseapp.com",
+    databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+    projectId: "inventario-35d6b",
+    storageBucket: "inventario-35d6b.appspot.com",
+    messagingSenderId: "266100399659",
+    appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+  };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+    const auth = getAuth(app);
 
-    async function editProduct(businessName, productId, updatedData) {
-      const productRef = doc(db, "businesses", businessName, "products", productId);
-
-      // Guardar el historial de ediciones en una colección separada 
-      await addDoc(collection(db, "productsHistory"), { 
-        productId: productId,
-        productName: updatedData.name,
-        editedDate: new Date().toISOString(),
-        businessName: businessName,
-        quantity: updatedData.quantity
-      });
-
-      // Actualizar el producto en la colección principal
-      await updateDoc(productRef, { 
-        quantity: updatedData.quantity
-      });
-
-      showAlert('Los cambios han sido subidos a Firebase.');
-      await loadProducts();  // Recargar los productos después de editar
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      };
+      return date.toLocaleString('es-ES', options).replace(',', '');
     }
 
-    async function deleteProduct(businessName, productId) {
-      const productRef = doc(db, "businesses", businessName, "products", productId);
-      const productSnap = await getDoc(productRef);
-
-      if (productSnap.exists()) {
-        const deletedSectionRef = collection(db, "deletedProducts");
-        await addDoc(deletedSectionRef, {
-          ...productSnap.data(),
-          deletedDate: new Date().toISOString(),
-          businessName: businessName
-        });
-        await deleteDoc(productRef);
-      }
-
-      showAlert('Producto eliminado correctamente.');
-      await loadProducts();
-    }
-
-    async function loadProducts() {
+    async function loadProducts(name = "", code = "", ean = "") {
       const businessesQuerySnapshot = await getDocs(collection(db, "businesses"));
       const productsSection = document.getElementById("productsSection");
       productsSection.innerHTML = "";
 
-      businessesQuerySnapshot.forEach(async (businessDoc) => {
+      for (const businessDoc of businessesQuerySnapshot.docs) {
         const businessName = businessDoc.data().name;
         const productsRef = collection(db, "businesses", businessName, "products");
         const productsQuerySnapshot = await getDocs(productsRef);
@@ -244,6 +213,15 @@
 
           productsQuerySnapshot.forEach((productDoc) => {
             const productData = productDoc.data();
+
+            if (
+              (name && !productData.name.toLowerCase().includes(name.toLowerCase())) ||
+              (code && !productData.code.includes(code)) ||
+              (ean && !productData.eanUpcCode.includes(ean))
+            ) {
+              return;
+            }
+
             const productDiv = document.createElement("div");
             productDiv.classList.add("product");
 
@@ -253,53 +231,153 @@
               productDiv.appendChild(img);
             }
 
-            const namePara = document.createElement("p");
-            namePara.textContent = `Nombre: ${productData.name}`;
-            productDiv.appendChild(namePara);
+            const userProfileImage = productData.userProfileImage || 'default-profile.jpg';
+            const lastEditedProfileImage = productData.lastEditedProfileImage || 'default-profile.jpg';
 
-            const quantityPara = document.createElement("p");
+            const details = `
+              <p><strong>Agregado por: ${productData.userName || 'N/A'}</strong> - ${formatDate(productData.addedDate) || 'N/A'}</p>
+              <img src="${userProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px;">
+              <p>Último usuario que editó: ${productData.lastEditedBy || 'N/A'} - ${formatDate(productData.lastEditedDate) || 'N/A'}</p>
+              <img src="${lastEditedProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px;">
+              <p>Nombre del Producto: ${productData.name || 'N/A'}</p>
+              <p>Tipo de Producto: ${productData.type || 'N/A'}</p>
+              <p>Descripción: ${productData.description || 'N/A'}</p>
+              <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p>
+              <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}</p>
+              <p>Precio por Unidad: ${productData.pricePerUnit || 'N/A'}</p>
+              <p>Precio por Paquete: ${productData.pricePerPackage || 'N/A'}</p>
+              <p>Precio por Fardo: ${productData.pricePerBale || 'N/A'}</p>
+              <p>Precio por Libra: ${productData.pricePerPound || 'N/A'}</p>
+              <p>Código EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p>
+              <p>Código del Producto: ${productData.code || 'N/A'}</p>
+            `;
+            productDiv.innerHTML += details;
+
+            const stockPara = document.createElement("p");
             if (productData.quantity === 0) {
-              quantityPara.textContent = `Cantidad: ${productData.quantity} - AGOTADO`;
-              quantityPara.classList.add("low-stock");
-            } else if (productData.quantity > 0 && productData.quantity <= 10) {
-              quantityPara.textContent = `Cantidad: ${productData.quantity} - CASI AGOTADO`;
-              quantityPara.classList.add("low-stock");
+              stockPara.textContent = "AGOTADO";
+              stockPara.classList.add("low-stock");
+            } else if (productData.quantity <= productData.lowStockThreshold) {
+              stockPara.textContent = "SE ESTÁ CASI AGOTANDO";
+              stockPara.classList.add("low-stock");
             } else {
-              quantityPara.textContent = `Cantidad: ${productData.quantity}`;
-              quantityPara.classList.remove("low-stock");
+              stockPara.textContent = `Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}`;
             }
-            productDiv.appendChild(quantityPara);
+            productDiv.appendChild(stockPara);
+
+            const expirationDate = new Date(productData.expirationDate);
+            const currentDate = new Date();
+            const daysUntilExpiration = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
+
+            const expirationPara = document.createElement("p");
+            expirationPara.textContent = `Días para vencer: ${daysUntilExpiration} días`;
+            if (daysUntilExpiration <= 30) {
+              expirationPara.classList.add("expiration-warning");
+            }
+            productDiv.appendChild(expirationPara);
 
             const editForm = document.createElement("div");
             editForm.classList.add("edit-form");
 
+            // Campo: Editar cantidad
+            const editQuantityLabel = document.createElement("label");
+            editQuantityLabel.textContent = "Editar cantidad de Unidad/Paquete/Fardo/Libras:";
             const editQuantityInput = document.createElement("input");
             editQuantityInput.type = "number";
             editQuantityInput.value = productData.quantity;
+            editForm.appendChild(editQuantityLabel);
             editForm.appendChild(editQuantityInput);
 
+            // Campo: Editar Unidad/Paquete/Fardo/Libras
+            const editUnitLabel = document.createElement("label");
+            editUnitLabel.textContent = "Editar Unidad/Paquete/Fardo/Libras:";
+            const editUnitInput = document.createElement("select");
+            const options = ["Unidad", "Paquete", "Fardo", "Libras"];
+            options.forEach(option => {
+              const opt = document.createElement("option");
+              opt.value = option;
+              opt.textContent = option;
+              if (productData.unit === option) opt.selected = true;
+              editUnitInput.appendChild(opt);
+            });
+            editForm.appendChild(editUnitLabel);
+            editForm.appendChild(editUnitInput);
+
+            // Campo: Editar umbral de alerta
+            const editLowStockThresholdLabel = document.createElement("label");
+            editLowStockThresholdLabel.textContent = "Editar cantidad que debe notificar que el producto se está agotando:";
+            const editLowStockThreshold = document.createElement("input");
+            editLowStockThreshold.type = "number";
+            editLowStockThreshold.value = productData.lowStockThreshold || 10;
+            editForm.appendChild(editLowStockThresholdLabel);
+            editForm.appendChild(editLowStockThreshold);
+
+            // Campo: Cambiar precio
+            const editPriceLabel = document.createElement("label");
+            editPriceLabel.textContent = "Cambiar precio $DOP:";
+            const editPriceInput = document.createElement("input");
+            editPriceInput.type = "number";
+            editPriceInput.value = productData.pricePerUnit || 0;
+            editForm.appendChild(editPriceLabel);
+            editForm.appendChild(editPriceInput);
+
+            // Campo: Editar fecha de vencimiento
+            const editExpirationLabel = document.createElement("label");
+            editExpirationLabel.textContent = "Editar fecha de vencimiento:";
+            const editExpirationInput = document.createElement("input");
+            editExpirationInput.type = "date";
+            editExpirationInput.value = productData.expirationDate ? productData.expirationDate.split('T')[0] : '';
+            editForm.appendChild(editExpirationLabel);
+            editForm.appendChild(editExpirationInput);
+
+            // Botón para guardar los cambios
             const saveBtn = document.createElement("button");
             saveBtn.classList.add("btn");
             saveBtn.textContent = "Guardar";
             saveBtn.addEventListener("click", async () => {
-              const newQuantity = parseInt(editQuantityInput.value, 10);
-              await editProduct(businessName, productDoc.id, { 
-                name: productData.name, 
-                quantity: newQuantity 
-              });
+              try {
+                const newQuantity = parseInt(editQuantityInput.value, 10);
+                const newUnit = editUnitInput.value;
+                const newLowStockThreshold = parseInt(editLowStockThreshold.value, 10);
+                const newPrice = parseFloat(editPriceInput.value);
+                const newExpirationDate = editExpirationInput.value;
+                const user = auth.currentUser;
 
-              if (newQuantity === 0) {
-                quantityPara.textContent = `Cantidad: ${newQuantity} - AGOTADO`;
-                quantityPara.classList.add("low-stock");
-              } else if (newQuantity > 0 && newQuantity <= 10) {
-                quantityPara.textContent = `Cantidad: ${newQuantity} - CASI AGOTADO`;
-                quantityPara.classList.add("low-stock");
-              } else {
-                quantityPara.textContent = `Cantidad: ${newQuantity}`;
-                quantityPara.classList.remove("low-stock");
+                if (!user) {
+                  alert("Por favor, inicie sesión para guardar los cambios.");
+                  return;
+                }
+
+                // Guardar los cambios en Firebase
+                await updateDoc(doc(db, "businesses", businessName, "products", productDoc.id), {
+                  quantity: newQuantity,
+                  unit: newUnit,
+                  lowStockThreshold: newLowStockThreshold,
+                  pricePerUnit: newPrice,
+                  expirationDate: newExpirationDate,
+                  lastEditedBy: user.displayName || 'N/A',
+                  lastEditedDate: new Date().toISOString(),
+                  lastEditedProfileImage: user.photoURL || 'default-profile.jpg',
+                });
+
+                // Enviar historial de edición a "productsHistory"
+                await addDoc(collection(db, "productsHistory"), {
+                  businessName: businessName,
+                  productName: productData.name,
+                  editedBy: user.displayName || 'N/A',
+                  editDate: new Date().toISOString(),
+                  unit: newUnit,
+                  quantity: newQuantity,
+                  expirationDate: newExpirationDate,
+                });
+
+                // Actualizar la interfaz inmediatamente
+                loadProducts(name, code, ean);
+
+                showAlert("Cambios guardados correctamente.");
+              } catch (error) {
+                console.error("Error al guardar los cambios: ", error);
               }
-
-              editForm.style.display = "none";
             });
             editForm.appendChild(saveBtn);
             productDiv.appendChild(editForm);
@@ -316,7 +394,26 @@
             deleteBtn.classList.add("icon-btn", "delete-btn");
             deleteBtn.innerHTML = "<i class='fas fa-trash-alt'></i>";
             deleteBtn.addEventListener("click", async () => {
-              await deleteProduct(businessName, productDoc.id);
+              const user = auth.currentUser;
+
+              if (!user) {
+                alert("Por favor, inicie sesión para eliminar el producto.");
+                return;
+              }
+
+              // Enviar historial de eliminación a "deletedProducts"
+              await addDoc(collection(db, "deletedProducts"), {
+                businessName: businessName,
+                productName: productData.name,
+                deletedBy: user.displayName || 'N/A',
+                deleteDate: new Date().toISOString(),
+                unit: productData.unit,
+                quantity: productData.quantity,
+                expirationDate: productData.expirationDate,
+              });
+
+              await deleteDoc(doc(db, "businesses", businessName, "products", productDoc.id));
+              loadProducts();
             });
             productDiv.appendChild(deleteBtn);
 
@@ -327,31 +424,40 @@
           accordion.appendChild(accordionContent);
           productsSection.appendChild(accordion);
         }
-      });
+      }
     }
 
-    function showAlert(alertContent) {
-      const alert = document.getElementById("alert");
-      alert.innerHTML = alertContent; 
-      alert.classList.add("show");
+    function showAlert(message) {
+      const alertBox = document.getElementById("alert");
+      alertBox.innerHTML = message;
+      alertBox.classList.add("show");
 
       setTimeout(() => {
-        alert.classList.remove("show");
-      }, 7000);
+        alertBox.classList.remove("show");
+      }, 5000);
     }
 
-    function checkLowStock() {
+    function checkAlerts() {
       onSnapshot(collection(db, "businesses"), async (snapshot) => {
         let alertContent = "";
+        const currentDate = new Date();
+
         for (const businessDoc of snapshot.docs) {
           const businessName = businessDoc.data().name;
           const productsQuerySnapshot = await getDocs(collection(db, "businesses", businessName, "products"));
           let lowStockProducts = "";
 
           productsQuerySnapshot.forEach((productDoc) => {
-            const productData = productDoc.data(); 
-            if (productData.quantity > 0 && productData.quantity <= 10) {
-              lowStockProducts += `<li>${productData.name} - ${productData.quantity} unidades</li>`;  
+            const productData = productDoc.data();
+            const expirationDate = new Date(productData.expirationDate);
+            const daysUntilExpiration = (expirationDate - currentDate) / (1000 * 60 * 60 * 24);
+
+            if (productData.quantity <= productData.lowStockThreshold) {
+              lowStockProducts += `<li>${productData.name} - ${productData.unit}</li>`;
+            }
+
+            if (daysUntilExpiration <= 30) {
+              lowStockProducts += `<li>${productData.name} - Fecha de vencimiento cercana: ${productData.expirationDate}</li>`;
             }
           });
 
@@ -366,8 +472,29 @@
       });
     }
 
-    loadProducts(); 
-    checkLowStock();
+    document.getElementById("searchName").addEventListener("input", (e) => {
+      const name = e.target.value;
+      const code = document.getElementById("searchCode").value;
+      const ean = document.getElementById("searchEAN").value;
+      loadProducts(name, code, ean);
+    });
+
+    document.getElementById("searchCode").addEventListener("input", (e) => { 
+      const code = e.target.value;
+      const name = document.getElementById("searchName").value; 
+      const ean = document.getElementById("searchEAN").value;
+      loadProducts(name, code, ean);
+    });
+
+    document.getElementById("searchEAN").addEventListener("input", (e) => {
+      const ean = e.target.value;
+      const name = document.getElementById("searchName").value;
+      const code = document.getElementById("searchCode").value;
+      loadProducts(name, code, ean);
+    });
+
+    loadProducts();
+    checkAlerts();
   </script>
 </body>
 </html>
