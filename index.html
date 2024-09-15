@@ -434,7 +434,7 @@
 
         setTimeout(() => {
             alertBox.classList.remove("show");
-        }, 5000);
+        }, 12000);
     }
 
     function checkAlerts() {
@@ -453,7 +453,7 @@
                     const daysUntilExpiration = (expirationDate - currentDate) / (1000 * 60 * 60 * 24);
 
                     if (productData.quantity <= productData.lowStockThreshold) {
-                        lowStockProducts += `<li>${productData.name} - ${productData.unit}</li>`;
+                        lowStockProducts += `<li>${productData.name} - ${productData.quantity}</li>`;
                     }
 
                     if (daysUntilExpiration <= 30) {
