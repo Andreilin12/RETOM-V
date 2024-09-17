@@ -476,7 +476,7 @@
     window.cerrarSesion = function() {
       signOut(auth).then(() => {
         alert('Sesión cerrada correctamente.');
-        window.location.href = 'http://action_exit'; // Redirigir después de cerrar sesión
+        window.location.href = 'index.html'; // Redirigir después de cerrar sesión
       }).catch((error) => {
         console.error('Error al cerrar sesión:', error);
       });
