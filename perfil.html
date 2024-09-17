@@ -415,3 +415,64 @@
             window.history.back();
         }
     </script>
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cerrar Sesión</title>
+  <style>
+    .logout-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #FF0000;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .logout-button:hover {
+      background-color: #FF6347;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botón de cerrar sesión -->
+  <button class="logout-button" onclick="cerrarSesion()">Cerrar Sesión</button>
+
+  <script type="module">
+    // Importar funciones necesarias de Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+
+    // Función para cerrar sesión
+    window.cerrarSesion = function() {
+      signOut(auth).then(() => {
+        alert('Sesión cerrada correctamente.');
+        window.location.href = 'http://action_exit'; // Redirigir después de cerrar sesión
+      }).catch((error) => {
+        console.error('Error al cerrar sesión:', error);
+      });
+    }
+  </script>
+</body>
+</html>
+
