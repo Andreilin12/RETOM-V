@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agregar Producto</title>
+  <title>Gestionar Productos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
@@ -24,70 +24,121 @@
     .form-section {
       margin-bottom: 20px;
     }
-    .form-section h2 {
-      margin-top: 0;
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
     }
-    form {
-      background: #fff;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    form select, form input, form button {
-      display: block;
-      width: 99%;
-      margin-bottom: 10px;
+    .search-container input {
+      width: 100%;
+      max-width: 150px;
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 5px;
     }
-    form button {
-      background-color: #16a085;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    form button:hover {
-      background-color: #2c3e50;
-    }
-    h2 {
-      color:#fff;
-    }
-    .input-group {
-      position: relative;
-    }
-    .input-group .icon {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #28a745;
-    }
-    #imageFile {
+    .accordion {
+      background-color: #fff;
       border: 1px solid #ddd;
       border-radius: 5px;
-      padding: 5px;
-      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      cursor: pointer;
     }
-    #imageFile::file-selector-button {
-      background: #16a085;
+    .accordion-header {
+      padding: 15px;
+      background-color: #16a085;
+      color: #fff;
+      border-radius: 5px 5px 0 0;
+    }
+    .accordion-content {
+      display: none;
+      padding: 15px;
+    }
+    .product {
+      margin-bottom: 10px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .product img {
+      max-width: 100px;
+      height: auto;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .product p {
+      margin: 0;
+    }
+    .low-stock {
+      color: red;
+      font-weight: bold;
+    }
+    .expiration-warning {
+      color: orange;
+    }
+    .edit-form {
+      display: none;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-direction: column;
+    }
+    .edit-form input, .edit-form label, .edit-form select {
+      width: 100%;
+      max-width: 250px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      background-color: #007bff;
       color: #fff;
       border: none;
+      padding: 5px 10px;
       border-radius: 5px;
       cursor: pointer;
     }
-    #imageFile::file-selector-button:hover {
-      background: #2c3e50;
+    .btn:hover {
+      background-color: #0056b3;
     }
-    #pricePerUnit, #pricePerPackage {
+    .delete-btn {
+      background-color: #16a085;
+    }
+    .delete-btn:hover {
+      background-color: #2c3e50;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: #16a085;
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+    .icon-btn:hover {
+      color: #2c3e50;
+    }
+    .alert {
       display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #dc3545;
+      color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
     }
-    #productType {
-      margin-bottom: 10px;
+    .alert.show {
+      display: block;
+    }
+    h2 {
+      color: #fff;
     }
 
-          .back-button {
+
+    .back-button {
     position: fixed;
     top: 10px; /* Distancia desde la parte superior */
     left: 10px; /* Distancia desde el borde izquierdo */
@@ -116,69 +167,33 @@
 <body>
   <header>
 
-      <button class="back-button" onclick="goBack()">
+        <button class="back-button" onclick="goBack()">
         <i class="fas fa-arrow-left"></i> Volver
-    </button>  
+    </button>
 
-    <h1>Agregar Producto</h1>
+    <h1>Gestionar Productos</h1>
   </header>
   <main>
     <section class="form-section">
-      <h2>Agregar Producto</h2>
-      <form id="addProductForm">
-        <label for="productBusinessName">Nombre del Negocio:</label>
-        <select id="productBusinessName" required></select>
-        
-        <label for="productName">Nombre del Producto:</label>
-        <input type="text" id="productName" required>
-        
-        <label for="productType">Tipo de Producto:</label>
-        <select id="productType">
-          <option value="">Selecciona un tipo</option>
-          <option value="unidad">Unidad</option>
-          <option value="paquete">Paquete</option>
-          <option value="fardo">Fardo</option>
-          <option value="libras">Libras</option>
-        </select>
-        
-        <div id="priceFields">
-          <label for="pricePerUnit">Precio por Unidad:</label>
-          <input type="number" step="0.01" id="pricePerUnit">
-          
-          <label for="pricePerPackage">Precio por Paquete:</label>
-          <input type="number" step="0.01" id="pricePerPackage">
-        </div>
-        
-        <label for="productUnit">Unidad/Paquete/Fardo/Libras:</label>
-        <input type="text" id="productUnit">
-        
-        <label for="expirationDate">Fecha de Vencimiento:</label>
-        <input type="date" id="expirationDate">
+      <div class="search-container">
+        <input type="text" id="searchName" placeholder="Buscar por nombre">
+        <input type="text" id="searchCode" placeholder="Buscar por código">
+       <input type="text" id="searchEAN" placeholder="Buscar por EAN/UPC">
+      </div>
 
-        <label for="eanUpcCode">Código EAN/UPC:</label>
-        <input type="text" id="eanUpcCode" placeholder="Ingrese el código EAN o UPC">
-        
-        <label for="productCode">Código del Producto:</label>
-        <div class="input-group">
-          <input type="text" id="productCode" readonly>
-          <i class="fa-solid fa-refresh icon" id="generateCodeIcon"></i>
-        </div>
-        
-        <label for="imageFile">Imagen del Producto:</label>
-        <input type="file" id="imageFile" accept="image/*">
-        
-        <button type="submit">Agregar Producto</button>
-      </form>
+      <section id="productsSection" class="products-section">
+        <h2>Productos</h2>
+      </section>
     </section>
-  </main>
+  </main> 
+
+  <div id="alert" class="alert"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
-    // Firebase configuration
     const firebaseConfig = {
     apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
     authDomain: "inventario-35d6b.firebaseapp.com",
@@ -191,118 +206,333 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
     const auth = getAuth(app);
 
-    let currentUser = null;
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      };
+      return date.toLocaleString('es-ES', options).replace(',', '');
+    }
 
-    // Identificar al usuario actualmente logueado 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-      } else {
-        currentUser = null;
-        alert("Por favor, inicia sesión para agregar productos.");
-      }
-    });
-
-    async function loadBusinesses() {
+    async function loadProducts(name = "", code = "", ean = "") {
       const businessesQuerySnapshot = await getDocs(collection(db, "businesses"));
-      const productBusinessNameSelect = document.getElementById("productBusinessName");
-      productBusinessNameSelect.innerHTML = "";  // Limpiar opciones previas
+      const productsSection = document.getElementById("productsSection");
+      productsSection.innerHTML = "";
 
-      businessesQuerySnapshot.forEach((businessDoc) => {
-        const option = document.createElement("option");
-        option.value = businessDoc.id;
-        option.textContent = businessDoc.data().name;
-        productBusinessNameSelect.appendChild(option);
+      for (const businessDoc of businessesQuerySnapshot.docs) {
+        const businessName = businessDoc.data().name;
+        const productsRef = collection(db, "businesses", businessName, "products");
+        const productsQuerySnapshot = await getDocs(productsRef);
+
+        if (!productsQuerySnapshot.empty) {
+          const accordion = document.createElement("div");
+          accordion.classList.add("accordion");
+
+          const accordionHeader = document.createElement("div");
+          accordionHeader.classList.add("accordion-header");
+          accordionHeader.textContent = businessName;
+          accordionHeader.addEventListener("click", () => {
+            const content = accordion.querySelector(".accordion-content");
+            content.style.display = content.style.display === "block" ? "none" : "block";
+          });
+
+          const accordionContent = document.createElement("div");
+          accordionContent.classList.add("accordion-content");
+
+          productsQuerySnapshot.forEach((productDoc) => {
+            const productData = productDoc.data();
+
+            if (
+              (name && !productData.name.toLowerCase().includes(name.toLowerCase())) ||
+              (code && !productData.code.includes(code)) ||
+              (ean && !productData.eanUpcCode.includes(ean))
+            ) {
+              return;
+            }
+
+            const productDiv = document.createElement("div");
+            productDiv.classList.add("product");
+
+            if (productData.imageUrl) {
+              const img = document.createElement("img");
+              img.src = productData.imageUrl;
+              productDiv.appendChild(img);
+            }
+
+            const userProfileImage = productData.userProfileImage || 'https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727';
+            const lastEditedProfileImage = productData.lastEditedProfileImage || 'https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727';
+
+            const details = `
+              <p><strong>Agregado por: ${productData.userName || 'N/A'}</strong> - ${formatDate(productData.addedDate) || 'N/A'}</p>
+              <img src="${userProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
+              <p>Último usuario que editó: ${productData.lastEditedBy || 'N/A'} - ${formatDate(productData.lastEditedDate) || 'N/A'}</p>
+              <img src="${lastEditedProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
+              <p>Nombre del Producto: ${productData.name || 'N/A'}</p>
+              <p>Tipo de Producto: ${productData.type || 'N/A'}</p>
+              <p>Descripción: ${productData.description || 'N/A'}</p>
+              <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p> 
+              <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}</p>
+              <p>Precio por Unidad: ${productData.pricePerUnit || 'N/A'}</p>
+              <p>Precio por Paquete: ${productData.pricePerPackage || 'N/A'}</p>
+              <p>Precio por Fardo: ${productData.pricePerBale || 'N/A'}</p>
+              <p>Precio por Libra: ${productData.pricePerPound || 'N/A'}</p>
+              <p>Código EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p> 
+              <p>Código del Producto: ${productData.code || 'N/A'}</p>
+            `;  
+            productDiv.innerHTML += details;
+
+            const stockPara = document.createElement("p"); 
+            if (productData.quantity === 0) {
+              stockPara.textContent = "AGOTADO";
+              stockPara.classList.add("low-stock");
+            } else if (productData.quantity <= productData.lowStockThreshold) {
+              stockPara.textContent = "SE ESTÁ CASI AGOTANDO";
+              stockPara.classList.add("low-stock");
+            } else {
+              stockPara.textContent = `Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}`;
+            }
+            productDiv.appendChild(stockPara);
+
+            const expirationDate = new Date(productData.expirationDate);
+            const currentDate = new Date();
+            const daysUntilExpiration = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
+
+            const expirationPara = document.createElement("p");
+            expirationPara.textContent = `Días para vencer: ${daysUntilExpiration} días`;
+            if (daysUntilExpiration <= 30) {
+              expirationPara.classList.add("expiration-warning");
+            }
+            productDiv.appendChild(expirationPara);
+
+            const editForm = document.createElement("div");
+            editForm.classList.add("edit-form");
+
+            // Campo: Editar cantidad
+            const editQuantityLabel = document.createElement("label");
+            editQuantityLabel.textContent = "Editar cantidad de Unidad/Paquete/Fardo/Libras:";
+            const editQuantityInput = document.createElement("input");
+            editQuantityInput.type = "number";
+            editQuantityInput.value = productData.quantity;
+            editForm.appendChild(editQuantityLabel);
+            editForm.appendChild(editQuantityInput);
+
+            // Campo: Editar Unidad/Paquete/Fardo/Libras
+            const editUnitLabel = document.createElement("label");
+            editUnitLabel.textContent = "Editar Unidad/Paquete/Fardo/Libras:";
+            const editUnitInput = document.createElement("select");
+            const options = ["Unidad", "Paquete", "Fardo", "Libras"];
+            options.forEach(option => {
+              const opt = document.createElement("option");
+              opt.value = option;
+              opt.textContent = option;
+              if (productData.unit === option) opt.selected = true;
+              editUnitInput.appendChild(opt);
+            });
+            editForm.appendChild(editUnitLabel);
+            editForm.appendChild(editUnitInput);
+
+            // Campo: Editar umbral de alerta
+            const editLowStockThresholdLabel = document.createElement("label");
+            editLowStockThresholdLabel.textContent = "Editar cantidad que debe notificar que el producto se está agotando:";
+            const editLowStockThreshold = document.createElement("input");
+            editLowStockThreshold.type = "number";
+            editLowStockThreshold.value = productData.lowStockThreshold || 10;
+            editForm.appendChild(editLowStockThresholdLabel);
+            editForm.appendChild(editLowStockThreshold);
+
+            // Campo: Cambiar precio
+            const editPriceLabel = document.createElement("label"); 
+            editPriceLabel.textContent = "Cambiar precio $DOP:";
+            const editPriceInput = document.createElement("input");
+            editPriceInput.type = "number";
+            editPriceInput.value = productData.pricePerUnit || 0;
+            editForm.appendChild(editPriceLabel);
+            editForm.appendChild(editPriceInput);
+
+            // Campo: Editar fecha de vencimiento
+            const editExpirationLabel = document.createElement("label");
+            editExpirationLabel.textContent = "Editar fecha de vencimiento:";
+            const editExpirationInput = document.createElement("input");
+            editExpirationInput.type = "date";
+            editExpirationInput.value = productData.expirationDate ? productData.expirationDate.split('T')[0] : '';
+            editForm.appendChild(editExpirationLabel);
+            editForm.appendChild(editExpirationInput);
+
+            // Botón para guardar los cambios
+            const saveBtn = document.createElement("button");
+            saveBtn.classList.add("btn");
+            saveBtn.textContent = "Guardar";
+            saveBtn.addEventListener("click", async () => {
+              try {
+                const newQuantity = parseInt(editQuantityInput.value, 10);
+                const newUnit = editUnitInput.value;
+                const newLowStockThreshold = parseInt(editLowStockThreshold.value, 10);
+                const newPrice = parseFloat(editPriceInput.value);
+                const newExpirationDate = editExpirationInput.value;
+                const user = auth.currentUser;
+
+                if (!user) {
+                  alert("Por favor, inicie sesión para guardar los cambios.");
+                  return;
+                }
+
+                // Guardar los cambios en Firebase
+                await updateDoc(doc(db, "businesses", businessName, "products", productDoc.id), {
+                  quantity: newQuantity,
+                  unit: newUnit,
+                  lowStockThreshold: newLowStockThreshold,
+                  pricePerUnit: newPrice,
+                  expirationDate: newExpirationDate,
+                  lastEditedBy: user.email || 'N/A',
+                  lastEditedDate: new Date().toISOString(),
+                  lastEditedProfileImage: user.photoURL || 'default-profile.jpg',
+                });
+
+
+
+                // Enviar historial de edición a "productsHistory"
+                await addDoc(collection(db, "productsHistory"), {
+                  businessName: businessName,
+                  productName: productData.name,
+                  editedBy: user.displayName || 'N/A',
+                  editDate: new Date().toISOString(),
+                  unit: newUnit,
+                  quantity: newQuantity,
+                  expirationDate: newExpirationDate,
+                  userName: user ? user.displayName || 'N/A' : 'N/A', // Nombre del usuario
+                  lastEditedProfileImage: user ? user.photoURL || 'default-profile.jpg' : 'default-profile.jpg' // Foto de perfil
+                });
+
+                // Actualizar la interfaz inmediatamente
+                loadProducts(name, code, ean);
+
+                showAlert("Cambios guardados correctamente.");
+              } catch (error) {
+                console.error("Error al guardar los cambios: ", error);
+              }
+            });
+            editForm.appendChild(saveBtn);
+            productDiv.appendChild(editForm);
+
+            const editBtn = document.createElement("button");
+            editBtn.classList.add("icon-btn");
+            editBtn.innerHTML = "<i class='fas fa-edit'></i>";
+            editBtn.addEventListener("click", () => {
+              editForm.style.display = editForm.style.display === "flex" ? "none" : "flex";
+            });
+            productDiv.appendChild(editBtn);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.classList.add("icon-btn", "delete-btn");
+            deleteBtn.innerHTML = "<i class='fas fa-trash-alt'></i>";
+            deleteBtn.addEventListener("click", async () => {
+              const user = auth.currentUser;
+
+              if (!user) {
+                alert("Por favor, inicie sesión para eliminar el producto.");
+                return;
+              }
+
+              // Enviar historial de eliminación a "deletedProducts"
+              await addDoc(collection(db, "deletedProducts"), {
+                businessName: businessName,
+                productName: productData.name,
+                deletedBy: user.email || 'N/A',
+                deleteDate: new Date().toISOString(),
+                unit: productData.unit,
+                quantity: productData.quantity,
+                expirationDate: productData.expirationDate,
+              });
+
+              await deleteDoc(doc(db, "businesses", businessName, "products", productDoc.id));
+              loadProducts();
+            });
+            productDiv.appendChild(deleteBtn);
+
+            accordionContent.appendChild(productDiv);
+          });
+
+          accordion.appendChild(accordionHeader);
+          accordion.appendChild(accordionContent);
+          productsSection.appendChild(accordion);
+        }
+      }
+    }
+
+    function showAlert(message) {
+      const alertBox = document.getElementById("alert");
+      alertBox.innerHTML = message;
+      alertBox.classList.add("show");
+
+      setTimeout(() => {
+        alertBox.classList.remove("show");
+      }, 12000); 
+    }
+
+    function checkAlerts() {
+      onSnapshot(collection(db, "businesses"), async (snapshot) => {
+        let alertContent = "";
+        const currentDate = new Date();
+
+        for (const businessDoc of snapshot.docs) {
+          const businessName = businessDoc.data().name;
+          const productsQuerySnapshot = await getDocs(collection(db, "businesses", businessName, "products"));
+          let lowStockProducts = "";
+
+          productsQuerySnapshot.forEach((productDoc) => {
+            const productData = productDoc.data();
+            const expirationDate = new Date(productData.expirationDate);
+            const daysUntilExpiration = (expirationDate - currentDate) / (1000 * 60 * 60 * 24);
+
+            if (productData.quantity <= productData.lowStockThreshold) {
+              lowStockProducts += `<li>${productData.name} - ${productData.quantity}</li>`;
+            }
+
+            if (daysUntilExpiration <= 30) {
+              lowStockProducts += `<li>${productData.name} - Fecha de vencimiento cercana: ${productData.expirationDate}</li>`;
+            }
+          });
+
+          if (lowStockProducts) {
+            alertContent += `<strong>${businessName}</strong><ul>${lowStockProducts}</ul>`;
+          }
+        }
+
+        if (alertContent) {
+          showAlert(alertContent);
+        }
       });
     }
 
-    function generateUniqueCode() {
-      return ('000000' + Math.floor(Math.random() * 1000000)).slice(-6);
-    }
-
-    document.getElementById("generateCodeIcon").addEventListener("click", () => {
-      const uniqueCode = generateUniqueCode();
-      document.getElementById("productCode").value = uniqueCode;
+    document.getElementById("searchName").addEventListener("input", (e) => {
+      const name = e.target.value;
+      const code = document.getElementById("searchCode").value;
+      const ean = document.getElementById("searchEAN").value;
+      loadProducts(name, code, ean);
     });
 
-    document.getElementById("productType").addEventListener("change", function() {
-      const type = this.value;
-      const unitField = document.getElementById("productUnit");
-      const pricePerUnit = document.getElementById("pricePerUnit");
-      const pricePerPackage = document.getElementById("pricePerPackage");
-
-      unitField.placeholder = type.charAt(0).toUpperCase() + type.slice(1);
-      
-      if (type === "unidad") {
-        pricePerUnit.style.display = "block";
-        pricePerPackage.style.display = "none";
-      } else if (type === "paquete") {
-        pricePerUnit.style.display = "none";
-        pricePerPackage.style.display = "block";
-      } else {
-        pricePerUnit.style.display = "none";
-        pricePerPackage.style.display = "none";
-      }
+    document.getElementById("searchCode").addEventListener("input", (e) => { 
+      const code = e.target.value;
+      const name = document.getElementById("searchName").value; 
+      const ean = document.getElementById("searchEAN").value;
+      loadProducts(name, code, ean);
     });
 
-    document.getElementById("addProductForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const businessName = document.getElementById("productBusinessName").value.trim();
-      const productName = document.getElementById("productName").value.trim();
-      const productType = document.getElementById("productType").value.trim();
-      const productUnit = document.getElementById("productUnit").value.trim();
-      const expirationDate = document.getElementById("expirationDate").value.trim();
-      const pricePerUnit = document.getElementById("pricePerUnit").value.trim();
-      const pricePerPackage = document.getElementById("pricePerPackage").value.trim();
-      const eanUpcCode = document.getElementById("eanUpcCode").value.trim();
-      const imageFile = document.getElementById("imageFile").files[0];
-      const uniqueCode = document.getElementById("productCode").value.trim();
-      
-      if (!currentUser) {
-        alert("Debes estar logueado para agregar productos.");
-        return;
-      }
-
-      const userName = currentUser.displayName || currentUser.email;  // Usar displayName si está disponible
-
-      if (businessName && productName) {
-        let imageUrl = '';
-
-        if (imageFile) {
-          const imageRef = ref(storage, `images/${imageFile.name}`);
-          await uploadBytes(imageRef, imageFile);
-          imageUrl = await getDownloadURL(imageRef);
-        }
-
-        await addDoc(collection(db, "businesses", businessName, "products"), {
-          code: uniqueCode,
-          name: productName,
-          type: productType,
-          unit: productUnit,
-          pricePerUnit: pricePerUnit || null,
-          pricePerPackage: pricePerPackage || null,
-          expirationDate: expirationDate,
-          eanUpcCode: eanUpcCode || null,
-          imageUrl: imageUrl,
-          addedDate: new Date().toISOString(),
-          lastUpdated: new Date().toISOString(),
-          userName: userName
-        });
-
-        alert("Producto agregado exitosamente.");
-      } else {
-        alert("Por favor, completa los campos obligatorios.");
-      }
+    document.getElementById("searchEAN").addEventListener("input", (e) => {
+      const ean = e.target.value;
+      const name = document.getElementById("searchName").value;
+      const code = document.getElementById("searchCode").value;
+      loadProducts(name, code, ean);
     });
 
-    loadBusinesses();
+    loadProducts();
+    checkAlerts();
   </script>
 </body>
 </html>
-
 
 
 
