@@ -47,7 +47,7 @@
     .accordion-header {
       padding: 15px;
       background-color: #16a085;
-      color: #fff;
+      color: #fff; 
       border-radius: 5px 5px 0 0;
     }
     .accordion-content {
@@ -262,29 +262,29 @@
               productDiv.appendChild(img);
             }
 
-            const userProfileImage = productData.userProfileImage || 'default-profile.jpg';
-            const lastEditedProfileImage = productData.lastEditedProfileImage || 'default-profile.jpg';
+            const userProfileImage = productData.userProfileImage || 'https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727';
+            const lastEditedProfileImage = productData.lastEditedProfileImage || 'https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727';
 
             const details = `
               <p><strong>Agregado por: ${productData.userName || 'N/A'}</strong> - ${formatDate(productData.addedDate) || 'N/A'}</p>
-              <img src="${userProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px;">
+              <img src="${userProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
               <p>Último usuario que editó: ${productData.lastEditedBy || 'N/A'} - ${formatDate(productData.lastEditedDate) || 'N/A'}</p>
-              <img src="${lastEditedProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px;">
+              <img src="${lastEditedProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
               <p>Nombre del Producto: ${productData.name || 'N/A'}</p>
               <p>Tipo de Producto: ${productData.type || 'N/A'}</p>
               <p>Descripción: ${productData.description || 'N/A'}</p>
-              <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p>
+              <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p> 
               <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}</p>
               <p>Precio por Unidad: ${productData.pricePerUnit || 'N/A'}</p>
               <p>Precio por Paquete: ${productData.pricePerPackage || 'N/A'}</p>
               <p>Precio por Fardo: ${productData.pricePerBale || 'N/A'}</p>
               <p>Precio por Libra: ${productData.pricePerPound || 'N/A'}</p>
-              <p>Código EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p>
+              <p>Código EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p> 
               <p>Código del Producto: ${productData.code || 'N/A'}</p>
-            `;
+            `;  
             productDiv.innerHTML += details;
 
-            const stockPara = document.createElement("p");
+            const stockPara = document.createElement("p"); 
             if (productData.quantity === 0) {
               stockPara.textContent = "AGOTADO";
               stockPara.classList.add("low-stock");
@@ -386,10 +386,12 @@
                   lowStockThreshold: newLowStockThreshold,
                   pricePerUnit: newPrice,
                   expirationDate: newExpirationDate,
-                  lastEditedBy: user.displayName || 'N/A',
+                  lastEditedBy: user.email || 'N/A',
                   lastEditedDate: new Date().toISOString(),
                   lastEditedProfileImage: user.photoURL || 'default-profile.jpg',
                 });
+
+
 
                 // Enviar historial de edición a "productsHistory"
                 await addDoc(collection(db, "productsHistory"), {
@@ -400,7 +402,8 @@
                   unit: newUnit,
                   quantity: newQuantity,
                   expirationDate: newExpirationDate,
-                  userName: user.displayName
+                  userName: user ? user.email || 'N/A' : 'N/A', // Nombre del usuario
+                  lastEditedProfileImage: user ? user.photoURL || 'default-profile.jpg' : 'default-profile.jpg' // Foto de perfil
                 });
 
                 // Actualizar la interfaz inmediatamente
@@ -437,7 +440,7 @@
               await addDoc(collection(db, "deletedProducts"), {
                 businessName: businessName,
                 productName: productData.name,
-                deletedBy: user.displayName || 'N/A',
+                deletedBy: user.email || 'N/A',
                 deleteDate: new Date().toISOString(),
                 unit: productData.unit,
                 quantity: productData.quantity,
