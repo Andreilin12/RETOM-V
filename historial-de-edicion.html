@@ -65,15 +65,18 @@
             auth.onAuthStateChanged((currentUser) => {
                 if (!currentUser) {
                     showAlert("Error: Usuario no autenticado.");
+                    console.log("No hay usuario autenticado.");
                     return;
                 }
 
+                console.log("Usuario autenticado:", currentUser.uid);
                 const userRef = doc(db, "users", currentUser.uid);
 
                 // Escuchar cambios en tiempo real
                 onSnapshot(userRef, (userDoc) => {
                     if (userDoc.exists()) {
                         const data = userDoc.data();
+                        console.log("Datos del usuario:", data);
                         if (data.grantedUsers && data.grantedUsers.includes(currentUser.uid)) {
                             document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón
                         } else {
@@ -82,6 +85,7 @@
                         }
                     } else {
                         showAlert("No se encontraron datos para el usuario.");
+                        console.log("No se encontraron datos para el usuario:", userRef);
                     }
                 }, (error) => {
                     console.error("Error al obtener datos del usuario: ", error);
