@@ -46,7 +46,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -61,11 +61,21 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // Configurar la persistencia de sesión
+        setPersistence(auth, browserSessionPersistence)
+            .then(() => {
+                // Verificar permisos al cargar la página
+                checkPermissions();
+            })
+            .catch((error) => {
+                console.error("Error al establecer la persistencia: ", error);
+            });
+
         function checkPermissions() {
-            auth.onAuthStateChanged((currentUser) => {
+            onAuthStateChanged(auth, (currentUser) => {
                 if (!currentUser) {
-                    showAlert("Error: Usuario no autenticado.");
-                    console.log("No hay usuario autenticado.");
+                    // Redirigir a la página de inicio de sesión
+                    window.location.href = 'login.html'; // Cambia a tu página de login
                     return;
                 }
 
@@ -104,9 +114,6 @@
                 alertDiv.style.display = "none"; // Ocultar después de 5 segundos
             }, 5000);
         }
-
-        // Verificar permisos al cargar la página
-        checkPermissions();
     </script>
 </body> 
-</html>
+</html>   
