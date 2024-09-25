@@ -65,47 +65,42 @@
         setPersistence(auth, browserSessionPersistence)
             .then(() => {
                 // Verificar permisos al cargar la página
-                checkPermissions();
+                onAuthStateChanged(auth, (currentUser) => {
+                    if (!currentUser) {
+                        // Redirigir a la página de inicio de sesión
+                        window.location.href = 'login.html'; // Cambia a tu página de login
+                        return;
+                    } 
+
+                    console.log("Usuario autenticado:", currentUser.uid);
+                    const userRef = doc(db, "users", currentUser.uid);
+
+                    // Escuchar cambios en tiempo real
+                    onSnapshot(userRef, (userDoc) => {
+                        if (userDoc.exists()) {
+                            const data = userDoc.data();
+                            console.log("Datos del usuario:", data);
+                            
+                            // Verificar permisos y mostrar u ocultar el botón
+                            if (data.grantedUsers && data.grantedUsers.includes(currentUser.uid)) {
+                                document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón
+                            } else {
+                                document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
+                                showAlert("No tienes permiso para realizar esta acción.");
+                            }
+                        } else {
+                            showAlert("No se encontraron datos para el usuario.");
+                            console.log("No se encontraron datos para el usuario:", userRef);
+                        }
+                    }, (error) => {
+                        console.error("Error al obtener datos del usuario: ", error);
+                        showAlert("Ocurrió un error al verificar permisos.");
+                    });
+                });
             })
             .catch((error) => {
                 console.error("Error al establecer la persistencia: ", error);
-                showAlert("Error al establecer la persistencia. Por favor, intenta nuevamente.");
             });
-
-        function checkPermissions() {
-            onAuthStateChanged(auth, (currentUser) => {
-                if (!currentUser) {
-                    // Redirigir a la página de inicio de sesión si el usuario no está autenticado
-                    window.location.href = 'login.html'; 
-                    return;
-                } 
-
-                console.log("Usuario autenticado:", currentUser.uid);
-                const userRef = doc(db, "users", currentUser.uid);
-
-                // Escuchar cambios en tiempo real
-                onSnapshot(userRef, (userDoc) => {
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        console.log("Datos del usuario:", data);
-                        
-                        // Verificar permisos y mostrar u ocultar el botón
-                        if (data.grantedUsers && data.grantedUsers.includes(currentUser.uid)) {
-                            document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón
-                        } else {
-                            document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
-                            showAlert("No tienes permiso para realizar esta acción.");
-                        }
-                    } else {
-                        showAlert("No se encontraron datos para el usuario.");
-                        console.log("No se encontraron datos para el usuario:", userRef);
-                    }
-                }, (error) => {
-                    console.error("Error al obtener datos del usuario: ", error);
-                    showAlert("Ocurrió un error al verificar permisos.");
-                });
-            }); 
-        }
 
         function showAlert(message) {
             const alertDiv = document.getElementById("alert");
