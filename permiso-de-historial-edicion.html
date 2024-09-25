@@ -86,7 +86,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, addDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -175,27 +175,19 @@
           });
           button.innerText = "Quitar Permiso"; // Cambiar a "Quitar Permiso"
           showAlert(`Permiso otorgado a ${userName} con éxito.`);
-          // Aquí puedes cargar los datos del colaborador después de dar permiso
-          loadUserData(userId);
         }
       } catch (error) {
         showAlert("Error al actualizar permiso: " + error);
       }
     };
 
-    function loadUserData(userId) {
-      const userRef = doc(db, "users", userId);
-      onSnapshot(userRef, (doc) => {
-        const data = doc.data();
-        if (data) {
-          showAlert(`Permiso otorgado a ${userName} con éxito.`);
-        } else {
-          showAlert("No se encontraron datos para el colaborador.");
-        } 
-      });
-    }
-
-    loadUsers();  
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadUsers();
+      } else {
+        showAlert("Error: Usuario no autenticado.");
+      }
+    });
   </script>   
 </body>
 </html>
