@@ -69,15 +69,16 @@
             })
             .catch((error) => {
                 console.error("Error al establecer la persistencia: ", error);
+                showAlert("Error al establecer la persistencia. Por favor, intenta nuevamente.");
             });
 
         function checkPermissions() {
             onAuthStateChanged(auth, (currentUser) => {
                 if (!currentUser) {
-                    // Redirigir a la página de inicio de sesión
-                    window.location.href = 'login.html'; // Cambia a tu página de login
+                    // Redirigir a la página de inicio de sesión si el usuario no está autenticado
+                    window.location.href = 'login.html'; 
                     return;
-                }
+                } 
 
                 console.log("Usuario autenticado:", currentUser.uid);
                 const userRef = doc(db, "users", currentUser.uid);
@@ -103,7 +104,7 @@
                     console.error("Error al obtener datos del usuario: ", error);
                     showAlert("Ocurrió un error al verificar permisos.");
                 });
-            });
+            }); 
         }
 
         function showAlert(message) {
@@ -116,4 +117,4 @@
         }
     </script>
 </body> 
-</html>   
+</html>
