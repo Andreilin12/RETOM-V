@@ -77,6 +77,8 @@
                     if (userDoc.exists()) {
                         const data = userDoc.data();
                         console.log("Datos del usuario:", data);
+                        
+                        // Verificar permisos y mostrar u ocultar el botón
                         if (data.grantedUsers && data.grantedUsers.includes(currentUser.uid)) {
                             document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón
                         } else {
