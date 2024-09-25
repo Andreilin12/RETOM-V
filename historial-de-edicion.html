@@ -45,7 +45,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
         const firebaseConfig = { 
@@ -64,52 +64,51 @@
         // Configurar la persistencia de sesión
         setPersistence(auth, browserSessionPersistence)
             .then(() => {
-                // Verificar permisos al cargar la página
+                // Verificar el estado de autenticación
                 onAuthStateChanged(auth, (currentUser) => {
-                    if (!currentUser) {
-                        // Redirigir a la página de inicio de sesión
-                        window.location.href = 'login.html'; // Cambia a tu página de login
-                        return;
-                    } 
-
-                    console.log("Usuario autenticado:", currentUser.uid);
-                    const userRef = doc(db, "users", currentUser.uid);
-
-                    // Escuchar cambios en tiempo real
-                    onSnapshot(userRef, (userDoc) => {
-                        if (userDoc.exists()) {
-                            const data = userDoc.data();
-                            console.log("Datos del usuario:", data);
-                            
-                            // Verificar permisos y mostrar u ocultar el botón
-                            if (data.grantedUsers && data.grantedUsers.includes(currentUser.uid)) {
-                                document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón
-                            } else {
-                                document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
-                                showAlert("No tienes permiso para realizar esta acción.");
-                            }
-                        } else {
-                            showAlert("No se encontraron datos para el usuario.");
-                            console.log("No se encontraron datos para el usuario:", userRef);
-                        }
-                    }, (error) => {
-                        console.error("Error al obtener datos del usuario: ", error);
-                        showAlert("Ocurrió un error al verificar permisos.");
-                    });
+                    const userId = currentUser ? currentUser.uid : "predefinedUserId"; // Cambiar a un ID predefinido si no hay sesión
+                    checkPermissions(userId); // Verificar permisos
                 });
             })
             .catch((error) => {
                 console.error("Error al establecer la persistencia: ", error);
             });
 
+        // Función para verificar permisos
+        function checkPermissions(userId) {
+            const userRef = doc(db, "users", userId);
+            
+            // Escuchar cambios en tiempo real
+            onSnapshot(userRef, (userDoc) => {
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    console.log("Datos del usuario:", data);
+                    
+                    // Verificar permisos
+                    if (data.grantedUsers && data.grantedUsers.includes(userId)) {
+                        document.getElementById("restrictedButton").style.display = "inline-block"; // Mostrar el botón 
+                    } else {
+                        document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
+                        showAlert("No tienes permiso para realizar esta acción.");
+                    }
+                } else {
+                    showAlert("No se encontraron datos para el usuario.");
+                    console.log("No se encontraron datos para el usuario:", userRef);
+                }
+            }, (error) => {
+                console.error("Error al obtener datos del usuario: ", error);
+                showAlert("Ocurrió un error al verificar permisos.");
+            }); 
+        }
+
         function showAlert(message) {
-            const alertDiv = document.getElementById("alert");
+            const alertDiv = document.getElementById("alert"); 
             alertDiv.innerText = message;
             alertDiv.style.display = "block"; // Mostrar la alerta
             setTimeout(() => {
-                alertDiv.style.display = "none"; // Ocultar después de 5 segundos
+                alertDiv.style.display = "none"; // Ocultar después de 5 segundos 
             }, 5000);
         }
-    </script>
-</body> 
+    </script> 
+</body>
 </html>
