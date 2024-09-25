@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -110,6 +110,7 @@
       }, 7000);
     }
 
+    // Cargar usuarios y permisos en tiempo real
     function loadUsers() {
       const userListContainer = document.getElementById("userListContainer");
 
@@ -121,15 +122,20 @@
           const userCard = document.createElement('div');
           userCard.classList.add('user-card');
 
-          // Verificar si el usuario ya tiene permiso
-          const hasPermission = data.grantedUsers && data.grantedUsers.includes(auth.currentUser.uid);
-          const buttonText = hasPermission ? "Quitar Permiso" : "Dar Permiso";
+          const userId = doc.id;
 
-          userCard.innerHTML = `
-            <img src="${data.photoURL || 'default-avatar.png'}" alt="${data.name}">
-            <span>${data.name}</span>
-            <button onclick="togglePermission('${doc.id}', this, '${data.name}')">${buttonText}</button>
-          `;
+          // Escuchar cambios en tiempo real en los permisos de cada usuario
+          onSnapshot(doc.ref, (userDoc) => {
+            const userData = userDoc.data();
+            const hasPermission = userData.grantedUsers && userData.grantedUsers.includes(userId); // Chequea permisos del usuario seleccionado, no del actual
+            const buttonText = hasPermission ? "Quitar Permiso" : "Dar Permiso";
+
+            userCard.innerHTML = `
+              <img src="${userData.photoURL || 'default-avatar.png'}" alt="${userData.name}">
+              <span>${userData.name}</span>
+              <button id="permiso-${userId}" onclick="togglePermission('${userId}', '${userData.name}')">${buttonText}</button>
+            `;
+          });
 
           userListContainer.appendChild(userCard);
         });
@@ -137,7 +143,7 @@
     }
 
     // Función para otorgar o revocar permisos
-    window.togglePermission = async (userId, button, userName) => {
+    window.togglePermission = async (userId, userName) => {
       const currentUser = auth.currentUser;
 
       if (!currentUser) {
@@ -146,13 +152,14 @@
       }
 
       const userRef = doc(db, "users", userId);
+      const button = document.getElementById(`permiso-${userId}`);
       const hasPermission = button.innerText === "Quitar Permiso";
 
       try {
         if (hasPermission) {
           // Quitar permiso
           await updateDoc(userRef, {
-            grantedUsers: arrayRemove(currentUser.uid)
+            grantedUsers: arrayRemove(userId)  // Quitar permisos del usuario seleccionado
           });
           await addDoc(collection(db, "permissions"), {
             userId: userId,
@@ -160,12 +167,11 @@
             grantedBy: currentUser.uid,
             timestamp: new Date()
           });
-          button.innerText = "Dar Permiso"; // Cambiar a "Dar Permiso"
           showAlert(`Permiso revocado para ${userName} con éxito.`);
         } else {
           // Dar permiso
           await updateDoc(userRef, {
-            grantedUsers: arrayUnion(currentUser.uid)
+            grantedUsers: arrayUnion(userId)  // Dar permisos al usuario seleccionado
           });
           await addDoc(collection(db, "permissions"), {
             userId: userId,
@@ -173,7 +179,6 @@
             grantedBy: currentUser.uid,
             timestamp: new Date()
           });
-          button.innerText = "Quitar Permiso"; // Cambiar a "Quitar Permiso"
           showAlert(`Permiso otorgado a ${userName} con éxito.`);
         }
       } catch (error) {
@@ -181,12 +186,13 @@
       }
     };
 
+    // Verificar autenticación y cargar usuarios en tiempo real
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loadUsers();
       } else {
         showAlert("Error: Usuario no autenticado.");
-      }
+      } 
     });
   </script>   
 </body>
