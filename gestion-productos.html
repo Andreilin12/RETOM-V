@@ -270,17 +270,13 @@
               <img src="${userProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
               <p>Último usuario que editó: ${productData.lastEditedBy || 'N/A'} - ${formatDate(productData.lastEditedDate) || 'N/A'}</p>
               <img src="${lastEditedProfileImage}" alt="Imagen de perfil" style="width:50px;height:50px; border-radius: 50px;">
-              <p>Nombre del Producto: ${productData.name || 'N/A'}</p>
-              <p>Tipo de Producto: ${productData.type || 'N/A'}</p>
-              <p>Descripción: ${productData.description || 'N/A'}</p>
-              <p>Fecha de Expiración: ${productData.expirationDate || 'N/A'}</p> 
-              <p>Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}</p>
-              <p>Precio por Unidad: ${productData.pricePerUnit || 'N/A'}</p>
-              <p>Precio por Paquete: ${productData.pricePerPackage || 'N/A'}</p>
-              <p>Precio por Fardo: ${productData.pricePerBale || 'N/A'}</p>
-              <p>Precio por Libra: ${productData.pricePerPound || 'N/A'}</p>
-              <p>Código EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p> 
-              <p>Código del Producto: ${productData.code || 'N/A'}</p>
+              <p>PRODUCTO: ${productData.name || 'N/A'}</p><br>
+              <p>TIPO DE PRODUCTO: ${productData.type || 'N/A'}</p><br>
+              <p>FECHA DE EXPIRACIÓN Expiración: ${productData.expirationDate || ''}</p> <br>
+              <p>CANTIDAD: ${productData.quantity} ${productData.unit || ''}</p><br>
+              <p>PRECIO POR UNIDAD: ${productData.pricePerUnit || '0.00'}</p><br>
+              <p>CÓDIGO EAN/UPC: ${productData.eanUpcCode || 'N/A'}</p> <br>
+              <p>CODIGO DEL PRODUCTO: ${productData.code || 'N/A'}</p><br>
             `;  
             productDiv.innerHTML += details;
 
@@ -292,8 +288,8 @@
               stockPara.textContent = "SE ESTÁ CASI AGOTANDO";
               stockPara.classList.add("low-stock");
             } else {
-              stockPara.textContent = `Unidad/Paquete/Fardo/Libras: ${productData.quantity} ${productData.unit || 'N/A'}`;
-            }
+              stockPara.textContent = `UNIDAD: ${productData.quantity} ${productData.unit || 'N/A'}`;
+            } 
             productDiv.appendChild(stockPara);
 
             const expirationDate = new Date(productData.expirationDate);
@@ -301,7 +297,7 @@
             const daysUntilExpiration = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
 
             const expirationPara = document.createElement("p");
-            expirationPara.textContent = `Días para vencer: ${daysUntilExpiration} días`;
+            expirationPara.textContent = `DÍAS PARA VENCER: ${daysUntilExpiration} días`;
             if (daysUntilExpiration <= 30) {
               expirationPara.classList.add("expiration-warning");
             }
