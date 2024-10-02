@@ -385,7 +385,7 @@
     }
 
     // Función para editar nombre de perfil
-    window.editarNombre = function() {
+    window.editarname = function() {
       const nuevoNombre = prompt("Ingrese el nuevo nombre de perfil:");
       if (nuevoNombre) {
         const user = auth.currentUser;
@@ -395,7 +395,7 @@
           // Actualizar el nombre de perfil en Firestore
           const userDocRef = doc(db, "users", user.uid);
           await setDoc(userDocRef, {
-            nombre: nuevoNombre
+            name: nuevoNombre
           }, { merge: true });
 
           document.getElementById('usuarioNombre').textContent = nuevoNombre;
