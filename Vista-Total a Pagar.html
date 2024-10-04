@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cálculo de Total General</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2C3E50;
+    }
+    header {
+      background-color: #2C3E50;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .total-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .total-section h2 {
+      margin-top: 0;
+    }
+    .total {
+      font-size: 110px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .btn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 1.2em;
+      margin-left: 10px;
+    }
+    .icon-btn:hover {
+      color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cálculo en General</h1>
+  </header>
+  <main>
+    <section class="total-section">
+      <h2>Total a Pagar</h2>
+      <div id="totalGeneral" class="total">0.00</div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, query, onSnapshot, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+    apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+    authDomain: "inventario-35d6b.firebaseapp.com",
+    databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+    projectId: "inventario-35d6b",
+    storageBucket: "inventario-35d6b.appspot.com",
+    messagingSenderId: "266100399659",
+    appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const totalGeneralDiv = document.getElementById('totalGeneral');
+
+    function updateTotalGeneral() {
+      const invoiceTotalsRef = collection(db, 'invoiceTotals');
+      const q = query(invoiceTotalsRef);
+
+      onSnapshot(q, (snapshot) => {
+        let totalGeneralPrice = 0;
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          totalGeneralPrice += data.totalPrice;
+        });
+        totalGeneralDiv.textContent = totalGeneralPrice.toFixed(2);
+      });
+    }
+
+    updateTotalGeneral();
+  </script>
+</body>
+</html>
