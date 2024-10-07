@@ -370,7 +370,7 @@
     });
 
     // Cambios de estado de autenticación
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user) => { 
         if (user) {
             document.querySelector('.login-container').style.display = 'none';
             document.querySelector('.home-container').style.display = 'block';
@@ -433,7 +433,7 @@
 
         setTimeout(() => {
             alertBox.classList.remove("show");
-        }, 12000);
+        }, 3000);
     }
 
     function checkAlerts() {
