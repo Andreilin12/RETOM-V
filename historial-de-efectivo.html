@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Cambios</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2C3E50;
+      color: #fff;
+    }
+    header {
+      background-color: #2C3E50;
+      padding: 10px 0;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .history-table th, .history-table td {
+      border: 1px solid #fff;
+      padding: 10px;
+      text-align: left;
+    }
+    .history-table th {
+      background-color: #34495e;
+    }
+    .button-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .button-container button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .button-container button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Estilos para el modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px; /* Ancho del modal */
+      text-align: left;
+      font-size: 12px;
+      font-family: 'Courier New', Courier, monospace;
+      position: absolute;
+      right: 20px; /* Colocar el modal a la derecha */
+      top: 50%;
+      transform: translateY(-50%); /* Centrar verticalmente */
+    }
+    .modal-header {
+      color: #000; /* Color del texto del encabezado */
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .modal-body {
+      color: #000; /* Color del texto del cuerpo */
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-footer button {
+      margin-left: 10px;
+    }
+
+    @media print {
+      /* Ocultar botones e íconos en la impresión */
+      .button-container, .modal-footer {
+        display: none;
+      }
+      /* Estilos para la factura */
+      .modal-body {
+        width: 100%; /* Asegurarse de que ocupe todo el ancho */
+        max-width: 80mm; /* Tamaño de ticket */
+        margin: 0 auto;
+      }
+      body {
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Historial de Cambios</h1>
+  </header>
+  <main>
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Monto Reducido</th>
+          <th>Total Después de Reducción</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <!-- Las filas de historial se llenarán aquí -->
+      </tbody>
+    </table>
+
+    <div class="button-container">
+      <button id="printButton">Imprimir</button>
+      <button id="wordButton">Convertir a Word</button>
+    </div>
+  </main>
+
+  <!-- Modal para imprimir factura -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Factura</div>
+      <div class="modal-body" id="modalBody">
+        <!-- Aquí se llenarán los datos de la factura -->
+      </div>
+      <div class="modal-footer">
+        <button id="closeModal">Cerrar</button>
+        <button id="printInvoice">Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    // Inicializar Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const historyBody = document.getElementById('historyBody');
+    const modal = document.getElementById('myModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    // Función para mostrar el historial de cambios
+    function displayHistory() {
+      const historyRef = collection(db, 'totalHistory');
+      const q = query(historyRef);
+
+      onSnapshot(q, (snapshot) => {
+        historyBody.innerHTML = ''; // Limpiar el cuerpo de la tabla antes de agregar nuevas filas
+
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const row = document.createElement('tr');
+
+          // Crear celdas con los datos del historial
+          row.innerHTML = `
+            <td>${data.amountReduced}</td>
+            <td>${data.totalAfterReduction}</td>
+            <td>${new Date(data.date).toLocaleString()}</td> 
+          `;
+          historyBody.appendChild(row);
+        });
+      });
+    }
+
+    // Función para mostrar el modal
+    function showModal() {
+      const rows = document.querySelectorAll('.history-table tbody tr');
+      let invoiceContent = `<div><strong>Historial de Cambios</strong></div><br>`;
+      invoiceContent += `<table style="width: 100%; border-collapse: collapse;">`;
+      invoiceContent += `<tr><th>Monto Reducido</th><th>Total Después de Reducción</th><th>Fecha</th></tr>`;
+
+      rows.forEach(row => {
+        const cells = row.children;
+        invoiceContent += `<tr>`;
+        for (let i = 0; i < cells.length; i++) {
+          invoiceContent += `<td>${cells[i].innerText}</td>`;
+        }
+        invoiceContent += `</tr>`;
+      });
+
+      invoiceContent += `</table>`;
+      modalBody.innerHTML = invoiceContent;
+      modal.style.display = "block";
+    }
+
+    // Función para imprimir el contenido del modal
+    function printInvoice() {
+      const printWindow = window.open('', '_blank', 'width=600,height=400');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Factura</title>
+            <style>
+              body { font-family: 'Courier New', Courier, monospace; margin: 0; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+              @media print {
+                @page {
+                  size: 80mm; /* Tamaño de ticket */
+                  margin: 0;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            ${modalBody.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // Función para convertir a Word
+    function convertToWord() {
+      let tableData = '<html xmlns:w="urn:schemas-microsoft-com:office:word">';
+      tableData += '<head><meta charset="utf-8"></head><body>';
+      tableData += '<table border="1" style="width: 100%; border-collapse: collapse;">';
+      tableData += '<tr><th>Monto Reducido</th><th>Total Después de Reducción</th><th>Fecha</th></tr>';
+
+      const rows = document.querySelectorAll('.history-table tbody tr');
+      rows.forEach(row => {
+        const cells = row.children;
+        tableData += '<tr>';
+        for (let i = 0; i < cells.length; i++) {
+          tableData += `<td>${cells[i].innerText}</td>`;
+        }
+        tableData += '</tr>';
+      });
+      
+      tableData += '</table></body></html>';
+      
+      const blob = new Blob([tableData], {
+        type: 'application/msword'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'HistorialCambios.doc';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('printButton').addEventListener('click', showModal);
+    document.getElementById('closeModal').addEventListener('click', () => {
+      modal.style.display = "none";
+    });
+    document.getElementById('printInvoice').addEventListener('click', printInvoice);
+    document.getElementById('wordButton').addEventListener('click', convertToWord);
+
+    // Llamar a la función para mostrar el historial al cargar la página
+    displayHistory();
+  </script>
+</body>
+</html>
