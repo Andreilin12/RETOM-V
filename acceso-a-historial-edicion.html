@@ -119,7 +119,7 @@
             onSnapshot(userRef, (userDoc) => {
                 if (userDoc.exists()) {
                     const data = userDoc.data();
-                    console.log("Datos del usuario:", data);
+                    console.log("Datos del usuario:", data); 
                     
                     // Verificar permisos
                     if (data.grantedUsers && data.grantedUsers.includes(userId)) {
@@ -129,7 +129,7 @@
                         showAlert("No tienes permiso para realizar esta acción.");
                     }
                 } else { 
-                    showAlert("No se encontraron datos para el usuario.");
+                    showAlert("No se encontraron datos para el usuario."); 
                     console.log("No se encontraron datos para el usuario:", userRef);
                 }
             }, (error) => {
