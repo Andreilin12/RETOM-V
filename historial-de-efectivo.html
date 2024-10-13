@@ -71,7 +71,7 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 400px; /* Ancho del modal */
+      width: 300px; /* Ancho del modal */
       text-align: left;
       font-size: 12px;
       font-family: 'Courier New', Courier, monospace;
@@ -94,7 +94,16 @@
       justify-content: flex-end;
     }
     .modal-footer button {
-      margin-left: 10px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-footer button:hover {
+      background-color: #2980b9;
     }
 
     @media print {
@@ -107,9 +116,24 @@
         width: 100%; /* Asegurarse de que ocupe todo el ancho */
         max-width: 80mm; /* Tamaño de ticket */
         margin: 0 auto;
+        font-size: 12px; /* Tamaño de fuente más pequeño */
       }
       body {
         margin: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0; /* Sin márgenes */
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 5px; /* Espaciado más compacto */
+        text-align: left;
+      }
+      @page {
+        size: 80mm; /* Tamaño de ticket */
+        margin: 0; /* Sin márgenes */
       }
     }
   </style>
@@ -226,15 +250,9 @@
           <head>
             <title>Factura</title>
             <style>
-              body { font-family: 'Courier New', Courier, monospace; margin: 0; }
+              body { font-family: Arial, sans-serif; }
               table { width: 100%; border-collapse: collapse; }
               th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-              @media print {
-                @page {
-                  size: 80mm; /* Tamaño de ticket */
-                  margin: 0;
-                }
-              }
             </style>
           </head>
           <body>
@@ -244,47 +262,37 @@
       `);
       printWindow.document.close();
       printWindow.print();
+      printWindow.close();
     }
 
-    // Función para convertir a Word
-    function convertToWord() {
-      let tableData = '<html xmlns:w="urn:schemas-microsoft-com:office:word">';
-      tableData += '<head><meta charset="utf-8"></head><body>';
-      tableData += '<table border="1" style="width: 100%; border-collapse: collapse;">';
-      tableData += '<tr><th>Monto Reducido</th><th>Total Después de Reducción</th><th>Fecha</th></tr>';
+    // Cerrar el modal
+    document.getElementById('closeModal').onclick = () => {
+      modal.style.display = "none";
+    };
 
-      const rows = document.querySelectorAll('.history-table tbody tr');
-      rows.forEach(row => {
-        const cells = row.children;
-        tableData += '<tr>';
-        for (let i = 0; i < cells.length; i++) {
-          tableData += `<td>${cells[i].innerText}</td>`;
-        }
-        tableData += '</tr>';
-      });
-      
-      tableData += '</table></body></html>';
-      
-      const blob = new Blob([tableData], {
-        type: 'application/msword'
+    // Imprimir la factura desde el modal
+    document.getElementById('printInvoice').onclick = printInvoice;
+
+    // Mostrar el historial
+    displayHistory();
+
+    // Manejar el evento de impresión de la tabla
+    document.getElementById('printButton').onclick = showModal;
+
+    // Función para convertir a Word
+    document.getElementById('wordButton').onclick = () => {
+      const table = document.querySelector('.history-table').outerHTML;
+      const blob = new Blob(['\uFEFF', table], {
+        type: 'application/vnd.ms-word;charset=utf-8'
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'HistorialCambios.doc';
+      a.download = 'historial.doc';
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    document.getElementById('printButton').addEventListener('click', showModal);
-    document.getElementById('closeModal').addEventListener('click', () => {
-      modal.style.display = "none";
-    });
-    document.getElementById('printInvoice').addEventListener('click', printInvoice);
-    document.getElementById('wordButton').addEventListener('click', convertToWord);
-
-    // Llamar a la función para mostrar el historial al cargar la página
-    displayHistory();
+      document.body.removeChild(a);
+    };
   </script>
 </body>
 </html>
