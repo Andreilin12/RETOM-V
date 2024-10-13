@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial de Cambios</title>
+  <title>Historial de Ingresos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
@@ -71,22 +71,24 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 300px; /* Ancho del modal */
+      width: 300px; 
       text-align: left;
-      font-size: 12px;
+      font-size: 12px;  
       font-family: 'Courier New', Courier, monospace;
-      position: absolute;
-      right: 20px; /* Colocar el modal a la derecha */
-      top: 50%;
-      transform: translateY(-50%); /* Centrar verticalmente */
+      position: fixed; /* Cambiar a fixed */
+      left: 50%; /* Centrar horizontalmente */
+      top: 50%; /* Centrar verticalmente */
+      transform: translate(-50%, -50%); /* Ajustar para centrar */
+      max-height: 80%; /* Máxima altura del modal */
+      overflow-y: auto; /* Habilitar desplazamiento vertical */
     }
     .modal-header {
-      color: #000; /* Color del texto del encabezado */
+      color: #000; 
       font-weight: bold;
       margin-bottom: 10px;
     }
     .modal-body {
-      color: #000; /* Color del texto del cuerpo */
+      color: #000;
       margin-bottom: 20px;
     }
     .modal-footer {
@@ -107,43 +109,47 @@
     }
 
     @media print {
-      /* Ocultar botones e íconos en la impresión */
+      body {
+        background-color: #fff; /* Fondo blanco al imprimir */
+      }
       .button-container, .modal-footer {
         display: none;
       }
-      /* Estilos para la factura */
       .modal-body {
-        width: 100%; /* Asegurarse de que ocupe todo el ancho */
-        max-width: 80mm; /* Tamaño de ticket */
+        width: 100%; 
+        max-width: 80mm;
         margin: 0 auto;
-        font-size: 12px; /* Tamaño de fuente más pequeño */
+        font-size: 12px; 
       }
-      body {
-        margin: 0;
+      header {
+        display: none; /* Ocultar encabezado al imprimir */
+      }
+      main {
+        text-align: center; /* Centrar el contenido impreso */
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin: 0; /* Sin márgenes */
+        margin: 0;
       }
       th, td {
         border: 1px solid #000;
-        padding: 5px; /* Espaciado más compacto */
+        padding: 5px;
         text-align: left;
       }
       @page {
-        size: 80mm; /* Tamaño de ticket */
-        margin: 0; /* Sin márgenes */
+        size: A4; /* Ajustar tamaño de página a A4 */
+        margin: 10mm; /* Margen de 10mm */
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Historial de Cambios</h1>
+    <h1>Historial de Ingresos</h1>
   </header>
   <main>
-    <table class="history-table">
+    <table class="history-table" id="historyTable">
       <thead>
         <tr>
           <th>Monto Reducido</th>
@@ -161,6 +167,23 @@
       <button id="wordButton">Convertir a Word</button>
     </div>
   </main>
+
+  <!-- Modal para seleccionar mes -->
+  <div id="monthModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Seleccionar Mes</div>
+      <div class="modal-body">
+        <label for="monthSelect">Seleccione un mes:</label>
+        <select id="monthSelect">
+          <!-- Opciones de meses -->
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button id="confirmMonth">Confirmar</button>
+        <button id="closeMonthModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal para imprimir factura -->
   <div id="myModal" class="modal">
@@ -197,102 +220,104 @@
     const historyBody = document.getElementById('historyBody');
     const modal = document.getElementById('myModal');
     const modalBody = document.getElementById('modalBody');
-    
-    // Función para mostrar el historial de cambios
+    const monthModal = document.getElementById('monthModal');
+    const monthSelect = document.getElementById('monthSelect');
+    const confirmMonthButton = document.getElementById('confirmMonth');
+
+    // Cargar meses en el select
+    const loadMonths = () => {
+      const months = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index + 1; // Mes como número
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+    };
+
+    // Mostrar el historial completo
     function displayHistory() {
       const historyRef = collection(db, 'totalHistory');
       const q = query(historyRef);
 
       onSnapshot(q, (snapshot) => {
-        historyBody.innerHTML = ''; // Limpiar el cuerpo de la tabla antes de agregar nuevas filas
+        historyBody.innerHTML = ''; 
 
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
           const row = document.createElement('tr');
-
-          // Crear celdas con los datos del historial
           row.innerHTML = `
             <td>${data.amountReduced}</td>
             <td>${data.totalAfterReduction}</td>
-            <td>${new Date(data.date).toLocaleString()}</td> 
+            <td>${new Date(data.date).toLocaleDateString()}</td>
           `;
           historyBody.appendChild(row);
         });
       });
     }
 
-    // Función para mostrar el modal
-    function showModal() {
-      const rows = document.querySelectorAll('.history-table tbody tr');
-      let invoiceContent = `<div><strong>Historial de Cambios</strong></div><br>`;
-      invoiceContent += `<table style="width: 100%; border-collapse: collapse;">`;
-      invoiceContent += `<tr><th>Monto Reducido</th><th>Total Después de Reducción</th><th>Fecha</th></tr>`;
+    // Filtrar por mes
+    function printHistory(month) {
+      modal.style.display = 'block';
+      modalBody.innerHTML = ''; 
 
-      rows.forEach(row => {
-        const cells = row.children;
-        invoiceContent += `<tr>`;
-        for (let i = 0; i < cells.length; i++) {
-          invoiceContent += `<td>${cells[i].innerText}</td>`;
+      const historyRef = collection(db, 'totalHistory');
+      const q = query(historyRef);
+      const filteredData = [];
+
+      onSnapshot(q, (snapshot) => {
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const date = new Date(data.date);
+          if (date.getMonth() + 1 === month) {
+            filteredData.push(data);
+          }
+        });
+
+        if (filteredData.length > 0) {
+          filteredData.forEach((data) => {
+            modalBody.innerHTML += `
+              <p>Monto Reducido: ${data.amountReduced}</p>
+              <p>Total Después de Reducción: ${data.totalAfterReduction}</p>
+              <p>Fecha: ${new Date(data.date).toLocaleDateString()}</p>
+              <hr>
+            `;
+          });
+        } else {
+          modalBody.innerHTML = '<p>No hay datos disponibles para este mes.</p>';
         }
-        invoiceContent += `</tr>`;
       });
-
-      invoiceContent += `</table>`;
-      modalBody.innerHTML = invoiceContent;
-      modal.style.display = "block";
     }
 
-    // Función para imprimir el contenido del modal
-    function printInvoice() {
-      const printWindow = window.open('', '_blank', 'width=600,height=400');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Factura</title>
-            <style>
-              body { font-family: Arial, sans-serif; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-            </style>
-          </head>
-          <body>
-            ${modalBody.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-      printWindow.close();
-    }
+    // Eventos de los botones
+    document.getElementById('printButton').addEventListener('click', () => {
+      monthModal.style.display = 'block'; 
+    });
 
-    // Cerrar el modal
-    document.getElementById('closeModal').onclick = () => {
-      modal.style.display = "none";
-    };
+    document.getElementById('closeModal').addEventListener('click', () => {
+      modal.style.display = 'none'; 
+    });
 
-    // Imprimir la factura desde el modal
-    document.getElementById('printInvoice').onclick = printInvoice;
+    document.getElementById('closeMonthModal').addEventListener('click', () => {
+      monthModal.style.display = 'none'; 
+    });
 
-    // Mostrar el historial
+    confirmMonthButton.addEventListener('click', () => {
+      const month = parseInt(monthSelect.value);
+      printHistory(month); 
+      monthModal.style.display = 'none'; 
+    });
+
+    document.getElementById('printInvoice').addEventListener('click', () => {
+      window.print(); 
+    });
+
+    // Inicializar la aplicación
+    loadMonths();
     displayHistory();
-
-    // Manejar el evento de impresión de la tabla
-    document.getElementById('printButton').onclick = showModal;
-
-    // Función para convertir a Word
-    document.getElementById('wordButton').onclick = () => {
-      const table = document.querySelector('.history-table').outerHTML;
-      const blob = new Blob(['\uFEFF', table], {
-        type: 'application/vnd.ms-word;charset=utf-8'
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'historial.doc';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
   </script>
 </body>
 </html>
