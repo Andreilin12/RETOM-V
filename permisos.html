@@ -160,9 +160,14 @@
 
     <div class="permissions" id="permissions" style="display: none;">
         <div class="permission-item">
+            <i class="fas fa-boxes"></i>
+            <a href="configuracion-Permisos-a-los-Inventarios.html" class="permission-title">Inventario</a>
+        </div>
+        <div class="permission-item">
             <i class="fas fa-history icon"></i>
             <a href="permiso-de-historial-edicion.html" class="permission-title">Historial de edición</a>
         </div>
+
     </div>
 </div>
 
@@ -201,7 +206,7 @@
         } else {
             errorMessage.style.display = 'block';
         }
-    });
+    }); 
 
     // Mostrar la sección de PIN al cargar la página  
     window.onload = function() {
@@ -219,6 +224,3 @@
             window.history.back();
         }
     </script>
-
-
-
