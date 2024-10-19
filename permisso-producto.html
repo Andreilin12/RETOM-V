@@ -74,8 +74,8 @@
     <button class="back-button" onclick="goBack()">
         <i class="fas fa-arrow-left"></i> Volver
     </button>  
-    <h1>Historial de Productos</h1>
-    <button id="restrictedButton" onclick="window.location.href='historial-de-edicion.html'">
+    <h1>Inventarios</h1>
+    <button id="restrictedButton" onclick="window.location.href='permisso-producto.html'">
         <i class="fas fa-check-circle" style="font-size: 20px; color: #fff;"></i> Consultar Productos Editados
     </button>
     <div id="alert" class="alert"></div>
@@ -123,7 +123,7 @@
                     
                     // Verificar permisos
                     if (data.admproducto && data.admproducto.includes(userId)) {
-                        window.location.href = 'gestion-productos.html'; // Redirigir a historiales.html
+                        window.location.href = 'gestion-productos.html'; // Redirigir a gestion-productos.html
                     } else {
                         document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
                         showAlert("No tienes permiso para realizar esta acción.");
