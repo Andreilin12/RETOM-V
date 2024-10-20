@@ -535,10 +535,16 @@
 
 
 
-    <!-- Incluye FontAwesome CDN para los iconos -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <script>
-        function goBack() {
+ <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+    function goBack() {
+        // Verifica si hay más de una entrada en el historial
+        if (window.history.length > 1) {
+            // Si hay más de una entrada, vuelve a la página anterior
             window.history.back();
+        } else {
+            // Si no hay más entradas, redirige a index.html
+            window.location.href = 'index.html';
         }
-    </script>
+    }
+</script>
