@@ -485,3 +485,36 @@
 </body>
 </html>
 
+
+     <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
+
+  <script>
+        // Bloquear el clic derecho
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Bloquear teclas específicas (F12, Ctrl+Shift+I, Ctrl+U)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === "F12") {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I (inspeccionar)
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (ver código fuente)
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J (consola)
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+        });
+    </script>
+
