@@ -25,10 +25,13 @@
             align-items: center;
             background-color: #1a2b3c;
             padding: 10px 20px;
+            
         }
         header h2 {
             margin: 0;
             font-size: 24px;
+            text-align: center;
+            
         }
         .icon-btn {
             background: none;
@@ -101,6 +104,7 @@
         }
         h2, h3 {
             color: white;
+            
         }
         /* Responsive styles */
         @media only screen and (max-width: 768px) {
@@ -111,11 +115,53 @@
                 width: 100%;
             }
         }
+
+
+
+       /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+        * {
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* estándar */
+            -webkit-user-drag: none; /* Safari */
+            -khtml-user-drag: none; /* Konqueror HTML */
+            -moz-user-drag: none; /* Firefox */
+            -o-user-drag: none; /* Opera */
+            user-drag: none; /* estándar */
+        }
+        .back-button {
+
+            background-color: #16a085; /* Color de fondo */
+            color: #fff; /* Color del texto y del icono */
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s; /* Transición suave para el color de fondo */
+            z-index: 1000; /* Asegura que el botón esté sobre otros elementos */
+        }
+        .back-button i {
+            margin-right: 8px; /* Espacio entre el icono y el texto */
+        }
+        .back-button:hover {
+            background-color: #2c2e50; /* Color de fondo al pasar el ratón */
+        }
     </style>
 </head>
 <body> 
+
+      
     <header>
-        <h2>Registro de Facturas</h2>
+
+
+          <button class="back-button" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> Volver
+    </button> 
+
         <!-- Button to view invoices -->
         <a href="ver-facturas.html" class="icon-btn" title="Ver Facturas">
             <i class="fas fa-file-invoice-dollar"></i>
@@ -127,10 +173,10 @@
             <div id="productsContainer"></div>
             <div class="buttons-container">
                 <button type="button" id="addProductButton" class="icon-btn" title="Agregar Producto">
-                    <i class="fas fa-plus-circle"></i> Agregar Producto
+                    <i class="fas fa-plus-circle"></i>
                 </button>
                 <button type="button" id="calculateTotalButton" class="icon-btn" title="Calcular Total">
-                    <i class="fas fa-calculator"></i> Calcular Total
+                    <i class="fas fa-calculator"></i>
                 </button>
             </div>
         </form>
@@ -139,7 +185,7 @@
         <div id="invoiceSummary" class="invoice-summary"></div>
 
         <button id="saveInvoiceButton" class="save-btn icon-btn" title="Guardar Factura">
-            <i class="fas fa-save"></i> Guardar Factura
+            <i class="fas fa-save"></i>
         </button>
     </div>
 
@@ -257,5 +303,13 @@
                 .catch(error => alert('Error al guardar la factura: ' + error));
         });
     </script>
+
+     
+   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>  
+    function goBack() {
+        window.history.back();
+    }
+</script> 
 </body>
 </html>
