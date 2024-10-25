@@ -3,46 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mostrar Facturas</title>
+    <title>Registro de Facturas</title>
+    <!-- Link to FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #2C3E50;
+            background-color: #2e3e50;
+            color: white;
         }
         .container {
             width: 90%;
             margin: auto;
             padding-top: 20px;
-                  padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-            
-           
         }
-        .invoice {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 80mm; /* Tamaño de un ticket */
-            text-align: left;
-            font-size: 12px; /* Tamaño de fuente para tickets */
-            font-family: 'Courier New', Courier, monospace; /* Fuente para tickets */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a2b3c;
+            padding: 10px 20px;
+            
+        }
+        header h2 {
+            margin: 0;
+            font-size: 24px;
+            text-align: center;
+            
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 20px;
         }
-        h3, h4 {
-            margin: 5px 0;
-            text-align: center;      /* Alinear el texto al centro */
+        input, select {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
-                 h2 {
-            color: #fff;
+        .product-entry {
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: white;
+            color: black;
+            border-radius: 5px;
         }
-        .button {
+        .invoice-summary {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            color: black;
+        }
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .buttons-container button {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 18px;
+            color: white;
+            background-color: #16a085;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .buttons-container button:hover {
+            background-color: #2C3E50;
+        }
+        button.save-btn {
             margin-top: 20px;
             padding: 10px;
             background-color: #16a085;
@@ -51,34 +99,26 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .button:hover {
-            background-color: #2e3e50;
+        button.save-btn:hover {
+            background-color: #2C3E50;
         }
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-                width: 21.6cm;
-                height: 35.6cm;
-                overflow: hidden; /* Evita el desplazamiento */
-            }
+        h2, h3 {
+            color: white;
+            
+        }
+        /* Responsive styles */
+        @media only screen and (max-width: 768px) {
             .container {
                 width: 100%;
-                padding: 0;
             }
-            .invoice {
-                width: 100%; /* Ancho completo para impresión */
-                margin: 0;
-                padding: 10mm; /* Espaciado interno para impresión */
-               
-            }
-            .button {
-                display: none; /* Ocultar botones al imprimir */
+            .invoice-summary {
+                width: 100%;
             }
         }
 
 
-        /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+
+       /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
         * {
             -webkit-user-select: none; /* Safari */
             -moz-user-select: none; /* Firefox */
@@ -91,9 +131,7 @@
             user-drag: none; /* estándar */
         }
         .back-button {
-            position: fixed;
-            top: 10px; /* Distancia desde la parte superior */
-            left: 10px; /* Distancia desde el borde izquierdo */
+
             background-color: #16a085; /* Color de fondo */
             color: #fff; /* Color del texto y del icono */
             border: none;
@@ -114,22 +152,47 @@
         }
     </style>
 </head>
-<body>
+<body> 
+
+      
+    <header>
+
 
           <button class="back-button" onclick="goBack()">
         <i class="fas fa-arrow-left"></i> Volver
-    </button>  
+    </button> 
+
+        <!-- Button to view invoices -->
+        <a href="ver-facturas.html" class="icon-btn" title="Ver Facturas">
+            <i class="fas fa-file-invoice-dollar"></i>
+        </a>
+    </header>
 
     <div class="container">
-        <h2>Listado de Facturas</h2>
-        <div id="invoicesContainer"></div>
-        <button class="button" id="reloadButton">Recargar Facturas</button>
+        <form id="invoiceForm">
+            <div id="productsContainer"></div>
+            <div class="buttons-container">
+                <button type="button" id="addProductButton" class="icon-btn" title="Agregar Producto">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <button type="button" id="calculateTotalButton" class="icon-btn" title="Calcular Total">
+                    <i class="fas fa-calculator"></i>
+                </button>
+            </div>
+        </form>
+
+        <h3>Resumen de la Factura</h3>
+        <div id="invoiceSummary" class="invoice-summary"></div>
+
+        <button id="saveInvoiceButton" class="save-btn icon-btn" title="Guardar Factura">
+            <i class="fas fa-save"></i>
+        </button>
     </div>
 
     <script type="module">
         // Importar Firebase y configurarlo
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -144,109 +207,104 @@
         // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const invoicesContainer = document.getElementById('invoicesContainer');
 
-        // Función para cargar y mostrar las facturas
-        function loadInvoices() {
-            const invoicesRef = ref(db, 'invoices');
+        let products = [];
 
-            onValue(invoicesRef, (snapshot) => {
-                invoicesContainer.innerHTML = ''; // Limpiar el contenedor antes de mostrar
-                const invoices = snapshot.val();
-                
-                if (invoices) {
-                    Object.entries(invoices).forEach(([key, invoice]) => {
-                        const invoiceDiv = document.createElement('div');
-                        invoiceDiv.classList.add('invoice');
-                        invoiceDiv.setAttribute('data-id', key); // Almacenar la ID de la factura
-                        invoiceDiv.innerHTML = `
-                            <h3>${invoice.nombreNegocio || 'FACTURAS'}</h3>
-                            <h3>${invoice.nombreNegocio || 'Nombre del Negocio'}</h3>
-                            <p><strong>Dirección:</strong> ${invoice.direccion || 'Dirección del Negocio'}</p>
-                            <p><strong>Factura ID:</strong> ${key}</p>
-                            <p><strong>Fecha:</strong> ${invoice.fecha}</p>
-                            <p><strong>Hora:</strong> ${invoice.hora}</p>
-                            <h4>Productos:</h4>
-                            <ul>
-                                ${invoice.products.map(product => `
-                                    <li>
-                                        <strong>${product.producto}</strong><br>
-                                        Cantidad: ${product.cantidad}<br>
-                                        Precio unitario: ${product.precio.toFixed(2)}<br>
-                                        Total: ${product.total.toFixed(2)}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                            <p><strong>Total ITBIS:</strong> ${invoice.products.reduce((sum, p) => sum + p.itbisAmount, 0).toFixed(2)}</p>
-                            <p><strong>Total Factura:</strong> ${invoice.products.reduce((sum, p) => sum + p.total, 0).toFixed(2)}</p>
-                            <button class="button print-button" onclick="printInvoice('${key}')">Imprimir</button>
-                        `;
-                        invoicesContainer.appendChild(invoiceDiv);
-                    });
-                } else {
-                    invoicesContainer.innerHTML = '<p>No hay facturas registradas.</p>';
-                }
-            }, {
-                onlyOnce: true // Para que no escuche constantemente
-            });
+        // Función para calcular el total de cada producto
+        function calculateProductTotal(precio, cantidad, itbisRate) {
+            const subtotal = cantidad * precio;
+            const itbisAmount = subtotal * itbisRate;
+            return { subtotal, itbisAmount, total: subtotal + itbisAmount };
         }
 
-        // Función para imprimir la factura
-        window.printInvoice = function(invoiceId) {
-            const invoiceDiv = document.querySelector(`.invoice[data-id='${invoiceId}']`); // Selecciona la factura por ID
-            const printWindow = window.open('', '_blank', 'width=600,height=600');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Factura ${invoiceId}</title>
-                        <style>
-                            @media print {
-                                body {
-                                    margin: 0;
-                                    padding: 0;
-                                    width: 21.6cm; /* Ancho para la impresión */
-                                    height: 35.6cm; /* Alto para la impresión */
-                                }
-                                .invoice {
-                                    width: 100%; /* Ancho completo para impresión */
-                                    margin: 0;
-                                    padding: 10mm; /* Espaciado interno para impresión */
-                                }
-                                .button {
-                                    display: none; /* Ocultar botones al imprimir */
-                                }
-                            }
-                            body {
-                                font-family: 'Courier New', Courier, monospace;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <h3>${invoiceDiv.querySelector('h3').innerText}</h3>
-                        <p><strong>Dirección:</strong> ${invoiceDiv.querySelector('p strong').nextSibling.textContent.trim()}</p>
-                        <p><strong>Factura ID:</strong> ${invoiceId}</p>
-                        <p><strong>Fecha:</strong> ${invoiceDiv.querySelectorAll('p')[2].innerText}</p>
-                        <p><strong>Hora:</strong> ${invoiceDiv.querySelectorAll('p')[3].innerText}</p>
-                        <h4>Productos:</h4>
-                        <ul>
-                            ${invoiceDiv.querySelector('ul').innerHTML}
-                        </ul>
-                        <p><strong>Total ITBIS:</strong> ${invoiceDiv.querySelectorAll('p')[invoiceDiv.querySelectorAll('p').length - 2].innerText}</p>
-                        <p><strong>Total Factura:</strong> ${invoiceDiv.querySelectorAll('p')[invoiceDiv.querySelectorAll('p').length - 1].innerText}</p>
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        };
+        // Añadir un nuevo producto a la factura
+        document.getElementById('addProductButton').addEventListener('click', function() {
+            const productsContainer = document.getElementById('productsContainer');
+            const productEntry = document.createElement('div');
+            productEntry.classList.add('product-entry');
+            productEntry.innerHTML = `
+                <input type="text" placeholder="Producto" class="producto" required>
+                <input type="number" placeholder="Cantidad" class="cantidad" required>
+                <input type="number" placeholder="Precio por unidad" class="precio" required>
+                <select class="itbis-select">
+                    <option value="0">Sin ITBIS</option>
+                    <option value="0.18">ITBIS 18%</option>
+                </select>
+            `;
+            productsContainer.appendChild(productEntry);
+        });
 
-        // Cargar facturas al inicio
-        loadInvoices();
+        // Calcular el total de todos los productos
+        document.getElementById('calculateTotalButton').addEventListener('click', function() {
+            products = [];
+            const productEntries = document.querySelectorAll('.product-entry');
+            let totalFactura = 0;
+            let totalITBIS = 0;
 
-        // Recargar facturas al hacer clic en el botón
-        document.getElementById('reloadButton').addEventListener('click', loadInvoices);
+            productEntries.forEach(entry => {
+                const producto = entry.querySelector('.producto').value;
+                const cantidad = parseFloat(entry.querySelector('.cantidad').value);
+                const precio = parseFloat(entry.querySelector('.precio').value);
+                const itbisRate = parseFloat(entry.querySelector('.itbis-select').value);
+
+                // Validar que los campos estén completos
+                if (!producto || isNaN(cantidad) || isNaN(precio)) {
+                    alert('Por favor, complete todos los campos.');
+                    return;
+                }
+
+                const { subtotal, itbisAmount, total } = calculateProductTotal(precio, cantidad, itbisRate);
+                products.push({ producto, cantidad, precio, subtotal, itbisAmount, total });
+
+                totalFactura += total;
+                totalITBIS += itbisAmount;
+            });
+
+            // Mostrar resumen de la factura
+            displayInvoiceSummary(totalFactura, totalITBIS);
+        });
+
+        // Mostrar el resumen de la factura
+        function displayInvoiceSummary(totalFactura, totalITBIS) {
+            const invoiceSummary = document.getElementById('invoiceSummary');
+            let productDetails = products.map(p => `
+                <p>Producto: ${p.producto}</p>
+                <p>Cantidad: ${p.cantidad}, Precio unitario: ${p.precio.toFixed(2)}</p>
+                <p>Subtotal: ${p.subtotal.toFixed(2)}, ITBIS: ${p.itbisAmount.toFixed(2)}</p>
+                <p>Total con ITBIS: ${p.total.toFixed(2)}</p>
+                <hr>
+            `).join('');
+
+            invoiceSummary.innerHTML = `
+                <h3>Factura Detallada</h3>
+                ${productDetails}
+                <p><strong>Total ITBIS:</strong> ${totalITBIS.toFixed(2)}</p>
+                <p><strong>Total Factura:</strong> ${totalFactura.toFixed(2)}</p>
+            `;
+        }
+
+        // Guardar factura en Firebase
+        document.getElementById('saveInvoiceButton').addEventListener('click', function() {
+            if (products.length === 0) {
+                alert('No hay productos para guardar en la factura.');
+                return;
+            }
+
+            const now = new Date();
+            const invoiceData = {
+                products: products,
+                createdAt: now.toISOString()
+            };
+
+            const invoiceRef = ref(db, 'invoices');
+            const newInvoiceRef = push(invoiceRef);
+            set(newInvoiceRef, invoiceData)
+                .then(() => alert('Factura guardada correctamente.'))
+                .catch(error => alert('Error al guardar la factura: ' + error));
+        });
     </script>
 
+     
    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>  
     function goBack() {
@@ -258,8 +316,7 @@
 
 
 
-
-     <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
+        <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
 
   <script>
         // Bloquear el clic derecho
@@ -289,5 +346,4 @@
                 e.preventDefault();
             }
         });
-    </script>
-
+            </script>
