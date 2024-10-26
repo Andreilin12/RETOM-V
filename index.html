@@ -515,37 +515,38 @@
 
 <!-- Accesos Directos -->
 
-<script>
-    document.addEventListener('keydown', function(event) {
-        // Ctrl + A para archivos.html
-        if (event.ctrlKey && event.key === 'a') {
-            window.location.href = 'archivos.html';
-            event.preventDefault();
-        }
-        
-        // Ctrl + N para Negocio.html
-        if (event.ctrlKey && event.key === 'n') {
-            window.location.href = 'Negocio.html';
-            event.preventDefault();
-        }
-        
-        // Ctrl + P para Producto.html
-        if (event.ctrlKey && event.key === 'p') {
-            window.location.href = 'Producto.html';
-            event.preventDefault();
-        }
-        
-        // Ctrl + S para soporte.html
-        if (event.ctrlKey && event.key === 's') {
-            window.location.href = 'soporte.html';
-            event.preventDefault();
-        }
-        
-        // Ctrl + Alt para permisos.html
-        if (event.ctrlKey && event.altKey) {
-            window.location.href = 'permisos.html';
-            event.preventDefault();
-        }
-    });
-</script>
+
+    <script>
+        document.addEventListener('keydown', function(event) {
+            // Ctrl + A: Ir a archivos.html
+            if (event.ctrlKey && event.key === 'a') {
+                event.preventDefault();
+                window.location.href = 'archivos.html';
+            }
+            
+            // Ctrl + N: Ir a Negocio.html
+            if (event.ctrlKey && event.key === 'n') {
+                event.preventDefault();
+                window.location.href = 'Negocio.html';
+            }
+            
+            // Ctrl + P: Ir a Producto.html
+            if (event.ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                window.location.href = 'Producto.html';
+            }
+            
+            // Ctrl + S: Ir a soporte.html
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                window.location.href = 'soporte.html';
+            }
+            
+            // Ctrl + Alt + C: Ir a permisos.html
+            if (event.ctrlKey && event.altKey && event.key === 'c') {
+                event.preventDefault();
+                window.location.href = 'permisos.html';
+            }
+        });
+    </script>
 
