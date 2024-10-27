@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Ingresos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #34495e;
+      color: #fff;
+    }
+    header {
+      background-color: #2C3E50;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    canvas {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .icon-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .icon-container i {
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      transition: color 0.3s;
+    }
+    .icon-container i:hover {
+      color: #3498db;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      max-width: 90%;
+      text-align: left;
+      font-size: 14px;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .modal-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-footer button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-footer button:hover {
+      background-color: #2980b9;
+    }
+
+    @media print {
+      body {
+        background-color: #fff;
+      }
+      header {
+        display: none;
+      }
+      main {
+        text-align: center;
+      }
+      canvas {
+        width: 100%;
+      }
+      .icon-container {
+        display: none; /* Ocultar los botones en la impresión */
+      }
+    }
+
+    .back-button {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background-color: #16a085;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      z-index: 1000;
+    }
+    .back-button:hover {
+      background-color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button class="back-button" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+    <h1>Historial de Ingresos</h1>
+  </header>
+  <main>
+    <canvas id="productChart" width="400" height="200"></canvas>
+    <div class="icon-container">
+      <i class="fas fa-print" id="printButton" title="Imprimir"></i>
+      <i class="fas fa-file-excel" id="excelButton" title="Convertir a Excel"></i>
+    </div>
+  </main>
+
+  <div id="monthModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Seleccionar Mes</div>
+      <div class="modal-body">
+        <label for="monthSelect">Seleccione un mes:</label>
+        <select id="monthSelect"></select>
+      </div>
+      <div class="modal-footer">
+        <button id="confirmMonth">Confirmar</button>
+        <button id="closeMonthModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const monthSelect = document.getElementById('monthSelect');
+    const productChartCanvas = document.getElementById('productChart');
+
+    const loadMonths = () => {
+      const months = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index + 1; // Mes como número
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+    };
+
+    const getColorByTotal = (total) => {
+      if (total < 5000) return 'rgba(255, 0, 0, 0.7)'; // Rojo
+      if (total < 20000) return 'rgba(255, 255, 0, 0.7)'; // Amarillo
+      if (total < 25000) return 'rgba(0, 0, 255, 0.7)'; // Azul
+      return 'rgba(0, 255, 0, 0.7)'; // Verde
+    };
+
+    const drawChart = (data) => {
+      const ctx = productChartCanvas.getContext('2d');
+      const labels = data.map(item => item.month);
+      const totals = data.map(item => item.totalAfterReduction);
+      const backgroundColors = totals.map(total => getColorByTotal(total));
+
+      const productChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Después de Reducción',
+            data: totals,
+            backgroundColor: backgroundColors,
+            borderColor: 'rgba(0, 0, 0, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Total'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Mes'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+            },
+            tooltip: {
+              callbacks: {
+                label: (tooltipItem) => {
+                  return `Total: ${tooltipItem.raw}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
+    const fetchData = () => {
+      const historyRef = collection(db, 'totalHistory');
+      const q = query(historyRef);
+
+      onSnapshot(q, (snapshot) => {
+        const monthlyData = Array(12).fill(0);
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const monthIndex = new Date(data.date).getMonth();
+          monthlyData[monthIndex] += data.totalAfterReduction || 0;
+        });
+        const chartData = monthlyData.map((total, index) => ({
+          month: new Date(0, index).toLocaleString('default', { month: 'long' }),
+          totalAfterReduction: total
+        }));
+        drawChart(chartData);
+      });
+    };
+
+    loadMonths();
+    fetchData();
+
+    document.getElementById('printButton').addEventListener('click', () => {
+      window.print();
+    });
+
+    document.getElementById('excelButton').addEventListener('click', () => {
+      const data = [['Mes', 'Total Después de Reducción']];
+      const monthlyData = Array(12).fill(0);
+      const historyRef = collection(db, 'totalHistory');
+
+      onSnapshot(historyRef, (snapshot) => {
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const monthIndex = new Date(data.date).getMonth();
+          monthlyData[monthIndex] += data.totalAfterReduction || 0;
+        });
+
+        monthlyData.forEach((total, index) => {
+          data.push([new Date(0, index).toLocaleString('default', { month: 'long' }), total]);
+        });
+
+        // Crear un archivo Excel
+        const worksheet = XLSX.utils.aoa_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Historial de Ingresos");
+        XLSX.writeFile(workbook, "historial_ingresos.xlsx");
+      });
+    });
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>
