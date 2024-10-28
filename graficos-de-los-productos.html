@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Productos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2C3E50;
+        }
+
+        header {
+            background-color: #34495E;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .counter {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            width: 300px;
+        }
+
+        .chart-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        canvas {
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        /* Estilo para los botones */
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            background-color: #3498db;
+        }
+
+        /* Ocultar botones en la impresión */
+        @media print {
+            .buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Inventario de Productos</h1>
+</header>
+
+<div class="container">
+    <div class="buttons">
+        <button class="button" id="printButton">
+            <i class="fas fa-print"></i>
+        </button>
+        <button class="button" id="downloadButton">
+            <i class="fas fa-file-image"></i>
+        </button>
+    </div>
+
+    <div class="counter">
+        <h2>Contador de Productos</h2>
+        <p><strong>Agotados:</strong> <span id="agotadosCount">0</span></p>
+        <p><strong>Casi Agotados:</strong> <span id="casiAgotadosCount">0</span></p>
+        <p><strong>No Agotados:</strong> <span id="noAgotadosCount">0</span></p>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="inventoryChart"></canvas>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function fetchInventory() {
+        let agotados = 0;
+        let casiAgotados = 0;
+        let noAgotados = 0;
+
+        const businessesSnapshot = await getDocs(collection(db, "businesses"));
+        const businesses = businessesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        for (const business of businesses) {
+            const productsSnapshot = await getDocs(collection(db, "businesses", business.id, "products"));
+            const products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            products.forEach(product => {
+                if (product.quantity === 0) {
+                    agotados++;
+                } else if (product.quantity < 10) {
+                    casiAgotados++;
+                } else {
+                    noAgotados++;
+                }
+            });
+        }
+
+        // Actualizar el contador en la página
+        document.getElementById('agotadosCount').textContent = agotados;
+        document.getElementById('casiAgotadosCount').textContent = casiAgotados;
+        document.getElementById('noAgotadosCount').textContent = noAgotados;
+
+        // Crear gráfico
+        createChart(agotados, casiAgotados, noAgotados);
+    }
+
+    function createChart(agotados, casiAgotados, noAgotados) {
+        const ctx = document.getElementById('inventoryChart').getContext('2d');
+        const inventoryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Agotados', 'Casi Agotados', 'No Agotados'],
+                datasets: [{
+                    label: 'Cantidad de Productos',
+                    data: [agotados, casiAgotados, noAgotados],
+                    backgroundColor: ['#e74c3c', '#f39c12', '#2ecc71'], 
+                    borderColor: ['#c0392b', '#e67e22', '#27ae60'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Función para imprimir
+    document.getElementById('printButton').addEventListener('click', () => {
+        window.print();
+    });
+
+    // Función para descargar el gráfico como imagen
+    document.getElementById('downloadButton').addEventListener('click', () => {
+        html2canvas(document.querySelector(".chart-container")).then(canvas => {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/jpeg', 1.0);
+            link.download = 'grafico_inventario.jpg';
+            link.click();
+        });
+    });
+
+    // Llamar a la función para recuperar datos
+    fetchInventory();
+</script>
+
+</body>
+</html>
