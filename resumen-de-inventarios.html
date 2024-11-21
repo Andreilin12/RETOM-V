@@ -81,47 +81,82 @@
 
     }
 
-    .btn-print {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #15a086;
-      border: none;
-      color: #fff;
-      font-size: 1em;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+    /* Estilo general */
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #1e1e2f, #303045);
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
 
-    .btn-print:hover {
-      background: #16e086;
-      color: #fff;
-    }
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
 
-    @media print {
-      .btn-print {
-        display: none;
-      }
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #15a086;
+}
 
-      body {
-        background: #fff;
-        color: #000;
-      }
-    }
+p {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
 
-     /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
-    * {
-        -webkit-user-select: none; /* Safari */
-        -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* IE 10+ */
-        user-select: none; /* estándar */
+.btn-print {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #15a086;
+  border: none;
+  color: #fff;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-        -webkit-user-drag: none; /* Safari */
-        -khtml-user-drag: none; /* Konqueror HTML */
-        -moz-user-drag: none; /* Firefox */
-        -o-user-drag: none; /* Opera */
-        user-drag: none; /* estándar */
-    }
+.btn-print:hover {
+  background: #16e086;
+  color: #fff;
+}
+
+/* Estilo para impresión */
+@media print {
+  /* Oculta todos los botones, incluidos los flotantes */
+  button, .btn-print, .floating-button {
+    display: none !important;
+  }
+
+  body {
+    background: #fff; /* Cambia el fondo a blanco en la impresión */
+    color: #000; /* Cambia el color de texto a negro */
+  }
+
+  .container {
+    max-width: 100%; /* Asegura que la caja ocupe el ancho completo */
+    box-shadow: none; /* Elimina la sombra para la impresión */
+    border-radius: 0; /* Elimina bordes redondeados */
+    padding: 0; /* Elimina el padding adicional */
+    text-align: left; /* Alinea el texto a la izquierda */
+  }
+
+  h1 {
+    font-size: 2em; /* Ajusta el tamaño del título para impresión */
+  }
+
+  p {
+    font-size: 1em; /* Ajusta el tamaño de los párrafos para impresión */
+  }
+}
+
 
   .back-button {
     position: fixed;
