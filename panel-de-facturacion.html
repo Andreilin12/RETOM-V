@@ -123,9 +123,14 @@
 
 /* Estilo para la impresión */
 @media print {
-  /* Oculta el botón de imprimir al imprimir */
+  /* Ocultar el botón de imprimir al imprimir */
   .print-button {
     display: none;
+  }
+
+  /* Ocultar cualquier botón flotante o cualquier otro botón */
+  button, .floating-button {
+    display: none !important;  /* Asegúrate de que todos los botones se oculten */
   }
 
   /* Fuerza que todo se ajuste a una sola página */
@@ -145,7 +150,13 @@
   html, body {
     overflow: hidden;
   }
+
+  /* Evita que cualquier elemento se quede flotante o visible en la impresión */
+  .floating-button, .some-other-class-for-floating-elements {
+    display: none !important;
+  }
 }
+
 
    .back-button {
     position: fixed;
@@ -407,4 +418,3 @@
             }
         });
     </script>
-
