@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto de Ventas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+  <style>
+/* Estilo general */
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #2c3e50, #16e086, #2c3e50);
+  color: #fff;
+  margin: 0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(44, 62, 80);
+  padding: 15px 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.icon {
+  color: #15a086;
+  font-size: 1.8em;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.icon:hover {
+  transform: scale(1.2);
+  color: #16e086;
+}
+
+/* Layout principal */
+main {
+  display: flex;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+.left-section,
+.right-section {
+  width: 50%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.left-section {
+  background: rgba(39, 60, 117, 0.8);
+  border-right: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.right-section {
+  background: rgba(25, 42, 86, 0.9);
+}
+
+/* Contenedor de búsqueda */
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-container input {
+  flex-grow: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #dfe6e9;
+  transition: background 0.3s ease;
+}
+
+.search-container input:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.search-container button {
+  background: #0984e3;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-container button:hover {
+  background: #74b9ff;
+}
+
+/* Listado de productos */
+.products-list,
+.invoice-list {
+  margin-top: 20px;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.product-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-5px);
+}
+
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.invoice-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.remove-btn {
+  background-color: #d63031;
+  color: #fff;
+  padding: 5px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.remove-btn:hover {
+  background-color: #ff7675;
+}
+
+/* Footer */
+footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(45, 52, 54, 0.9);
+  padding: 15px 30px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+}
+
+footer .icon {
+  font-size: 2em;
+}
+
+footer .icon:hover {
+  transform: scale(1.3);
+  color: #16e086;
+}
+
+/* Estilo del botón "Pagar" */
+#payButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #16e086, #15a086); /* Degradado azul */
+  color: #fff;
+  font-size: 18px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#payButton:hover {
+  background: linear-gradient(135deg, #15a086, #16e086); /* Degradado invertido */
+  transform: scale(1.05); /* Agranda ligeramente al pasar el mouse */
+}
+
+#payButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(41, 128, 185, 0.5); /* Sombra de enfoque */
+}
+
+.icon-btn i {
+  margin-right: 10px; /* Espacio entre el ícono y el texto */
+  font-size: 20px; /* Tamaño de ícono */
+}
+
+.btn {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+
+
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <!--
+    <a href="#"><i class="fa-solid fa-cash-register icon"></i></a>      -->
+    <a href="#"><i class="fa-solid fa-box icon"></i></a>
+<!--    <a href="#"><i class="fa-solid fa-receipt icon"></i></a>
+    <a href="#"><i class="fa-solid fa-user icon"></i></a>-->
+  </header>
+
+  <main>
+    <!-- Left Section: Search and Invoice -->
+    <section class="left-section">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar por EAN o UPC">
+      </div>
+      <div class="invoice" id="invoice">
+        <h3>Factura Actual</h3>
+        <div id="invoiceItems"></div>
+        <div class="total" id="invoiceTotal">Total: $0.00</div>
+      </div>
+      <button id="payButton" class="icon-btn btn"><i class="fa-solid fa-credit-card"></i> Pagar</button>
+    </section>
+
+    <!-- Right Section: Product List -->
+    <section class="right-section">
+      <h3>Todos los Productos</h3>
+      <div id="productList" class="products-list"></div>
+    </section>
+  </main>
+
+  <footer>
+<!--    <a href="#"><i class="fa-solid fa-house icon"></i>-->
+    <a href="faturacion.html"><i class="fa-solid fa-cart-plus icon"></i>
+<!--    <a href="#"><i class="fa-solid fa-barcode icon"></i>
+    <a href="#"><i class="fa-solid fa-cogs icon"></i>-->
+  </footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    where,
+    onSnapshot,
+    doc,
+    updateDoc,
+    addDoc,
+    deleteDoc,
+  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+    authDomain: "inventario-35d6b.firebaseapp.com",
+    projectId: "inventario-35d6b",
+    storageBucket: "inventario-35d6b.appspot.com",
+    messagingSenderId: "266100399659",
+    appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const searchInput = document.getElementById("searchInput");
+  const productList = document.getElementById("productList");
+  const invoiceItems = document.getElementById("invoiceItems");
+  const invoiceTotal = document.getElementById("invoiceTotal");
+  const payButton = document.getElementById("payButton");
+
+  let invoice = [];
+  let totalPrice = 0;
+
+  const renderProducts = async (searchTerm = "") => {
+    try {
+      const businessesRef = collection(db, "businesses");
+      const businessesSnapshot = await getDocs(businessesRef);
+
+      if (businessesSnapshot.empty) {
+        productList.innerHTML = "<p>No hay productos disponibles.</p>";
+        return;
+      }
+
+      productList.innerHTML = "";
+
+      businessesSnapshot.forEach((businessDoc) => {
+        const businessName = businessDoc.id;
+        const productsRef = collection(db, "businesses", businessName, "products");
+        let productsQuery = productsRef;
+
+        onSnapshot(productsQuery, (querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const product = doc.data();
+            const productDiv = document.createElement("div");
+            productDiv.classList.add("product-item");
+            productDiv.innerHTML = `
+              <div>${product.name}</div>
+              <div>Precio: $${product.pricePerUnit}</div>
+              <div>Stock: ${product.quantity}</div>
+              <div>Código EAN/UPC: ${product.eanUpcCode}</div>
+            `;
+            productDiv.addEventListener("click", () => updateInvoice(product, businessName, doc.id));
+            productList.appendChild(productDiv);
+          });
+        });
+      });
+
+      if (searchTerm) addToInvoiceBySearch(searchTerm);
+    } catch (error) {
+      console.error("Error al obtener los productos:", error);
+    }
+  };
+
+  const addToInvoiceBySearch = (searchTerm) => {
+    const businessesRef = collection(db, "businesses");
+
+    getDocs(businessesRef).then((businessesSnapshot) => {
+      businessesSnapshot.forEach((businessDoc) => {
+        const productsRef = collection(db, "businesses", businessDoc.id, "products");
+        const productsQuery = query(productsRef, where("eanUpcCode", "==", searchTerm));
+
+        onSnapshot(productsQuery, (querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const product = doc.data();
+            updateInvoice(product, businessDoc.id, doc.id);
+          });
+        });
+      });
+    });
+  };
+
+  const updateInvoice = (product, businessName, productId) => {
+    const existingProduct = invoice.find((item) => item.productId === productId);
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      invoice.push({ ...product, businessName, productId, quantity: 1 });
+    }
+
+    totalPrice += product.pricePerUnit * 1.18;
+    renderInvoice();
+  };
+
+  const renderInvoice = () => {
+    invoiceItems.innerHTML = "";
+    totalPrice = 0;
+
+    invoice.forEach((item) => {
+      const productDiv = document.createElement("div");
+      productDiv.classList.add("invoice-item");
+      productDiv.innerHTML = `
+        ${item.name} x ${item.quantity} - $${(item.pricePerUnit * 1.18 * item.quantity).toFixed(2)}
+        <button class="remove-btn" onclick="removeProduct('${item.productId}')">Eliminar</button>
+      `;
+      invoiceItems.appendChild(productDiv);
+      totalPrice += item.pricePerUnit * 1.18 * item.quantity;
+    });
+
+    invoiceTotal.textContent = `Total: $${totalPrice.toFixed(2)}`;
+  };
+
+  window.removeProduct = (productId) => {
+    const productIndex = invoice.findIndex((item) => item.productId === productId);
+    if (productIndex > -1) {
+      invoice[productIndex].quantity -= 1;
+      totalPrice -= invoice[productIndex].pricePerUnit * 1.18;
+      if (invoice[productIndex].quantity === 0) {
+        invoice.splice(productIndex, 1);
+      }
+      renderInvoice();
+    }
+  };
+
+  payButton.addEventListener("click", async () => {
+    if (invoice.length === 0) {
+      alert("No hay productos en la factura.");
+      return;
+    }
+
+    try {
+      const invoiceRef = collection(db, "invoices");
+      await addDoc(invoiceRef, {
+        items: invoice,
+        total: totalPrice.toFixed(2),
+        date: new Date(),
+      });
+
+      alert("Pago registrado exitosamente.");
+      invoice = [];
+      totalPrice = 0;
+      renderInvoice();
+    } catch (error) {
+      console.error("Error al guardar la factura:", error);
+    }
+  });
+
+  searchInput.addEventListener("input", (e) => {
+    renderProducts(e.target.value);
+  });
+
+  renderProducts();
+</script>
+
+</body>
+</html>
+
+
+
+
+  <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
+
+  <script>
+        // Bloquear el clic derecho
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Bloquear teclas específicas (F12, Ctrl+Shift+I, Ctrl+U)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === "F12") {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+I (inspeccionar)
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+            }
+
+            // Ctrl+U (ver código fuente)
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+            }
+
+            // Ctrl+Shift+J (consola)
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+            }
+        });
+    </script>
