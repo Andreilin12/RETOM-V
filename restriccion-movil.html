@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirección Automática</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Estilos generales */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #2c3e50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+     p {
+      font-size: 1.0rem;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .container {
+      text-align: center;
+      background-color: #3f5973;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .icon {
+      font-size: 5rem;
+      color: #15a086;
+      margin: 1rem 0;
+      animation: fadeIn 1s;
+    }
+
+    /* Animación de aparición */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Modal estilo futurista */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: ##5a7ea3;
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.2rem;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1s;
+    } 
+  </style>
+</head>
+<body onload="redirigirSegunDispositivo()">
+  <div class="container">
+    <h1>Bienvenido a</h1>
+    <p>Chat Retom</p>
+    <div class="icon">
+      <i class="fas fa-comments"></i> <!-- Icono de chat -->
+    </div>
+  </div>
+
+  <!-- Modal para el mensaje futurista -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <p>🚫 <strong>Lo sentimos</strong>, esta opción no está disponible en dispositivos móviles.</p>
+      <p>Para acceder a esta opción, por favor utiliza una <strong>PC</strong> o <strong>tablet</strong>.</p>
+    </div>
+  </div>
+
+  <script>
+    function redirigirSegunDispositivo() {
+      var userAgent = navigator.userAgent.toLowerCase();
+      var esMovil = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(userAgent);
+      var esTablet = /ipad|tablet/.test(userAgent);
+      
+      // Si es móvil, muestra el modal con el mensaje
+      if (esMovil) {
+        mostrarModal();
+      } else {
+        // Si es tablet o PC, redirige al enlace automáticamente
+        setTimeout(function() {
+          window.location.href = "chat-retom.html";
+        }, 2000); // Redirige después de 2 segundos para dar tiempo al mensaje
+      }
+    }
+
+    // Función para mostrar el modal
+    function mostrarModal() {
+      document.getElementById("myModal").style.display = "block";
+    }
+  </script>
+</body>
+</html>
