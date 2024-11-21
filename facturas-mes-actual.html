@@ -52,29 +52,58 @@
             margin: 0;
         }
         /* Estilo para el botón de imprimir */
-        .print-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #16a085;
-            color: white;
-            font-size: 24px;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        .print-button:hover {
-            background-color: #15a086;
-        }
+.print-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #16a085;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
 
-        /* Ocultar el botón de imprimir al momento de la impresión */
-        @media print {
-            .print-button {
-                display: none;
-            }
-        }
+.print-button:hover {
+    background-color: #15a086;
+}
+
+/* Ocultar todos los botones durante la impresión */
+@media print {
+    /* Oculta todos los botones en la página */
+    button,
+    .print-button,
+    .floating-button, 
+    .btn, 
+    .btn-floating, 
+    .action-button {
+        display: none !important; /* Asegura que se oculten sin importar su clase */
+    }
+
+    /* Ajustes de la página de impresión */
+    body {
+        background: #fff; /* Cambia el fondo a blanco */
+        color: #000; /* Cambia el color de texto a negro */
+    }
+
+    .container {
+        max-width: 100%; /* Asegura que la caja ocupe todo el ancho */
+        box-shadow: none; /* Elimina la sombra */
+        border-radius: 0; /* Elimina los bordes redondeados */
+        padding: 0; /* Elimina el padding adicional */
+        text-align: left; /* Alinea el texto a la izquierda */
+    }
+
+    h1 {
+        font-size: 2em; /* Ajusta el tamaño del título */
+    }
+
+    p {
+        font-size: 1em; /* Ajusta el tamaño del párrafo */
+    }
+}
 
          /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
     * {
