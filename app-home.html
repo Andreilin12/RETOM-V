@@ -170,93 +170,90 @@
             text-decoration: underline;
         }
     </style>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
-            authDomain: "inventario-35d6b.firebaseapp.com",
-            projectId: "inventario-35d6b",
-            storageBucket: "inventario-35d6b.appspot.com",
-            messagingSenderId: "266100399659",
-            appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const profilePicture = document.getElementById("profilePicture");
-            const userName = document.getElementById("userName");
-            const lastLogin = document.getElementById("lastLogin");
-            const greeting = document.querySelector(".greeting h2");
-            const iconBoxes = document.querySelectorAll('.icon-box');
-            const footerLinks = document.querySelectorAll('.footer-menu a');
+    document.addEventListener("DOMContentLoaded", () => {
+        const profilePicture = document.getElementById("profilePicture");
+        const userName = document.getElementById("userName");
+        const lastLogin = document.getElementById("lastLogin");
+        const greeting = document.querySelector(".greeting h2");
+        const iconBoxes = document.querySelectorAll('.icon-box');
+        const footerLinks = document.querySelectorAll('.footer-menu a');
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const displayName = user.displayName || "Usuario";
-                    const photoURL = user.photoURL || "https://example.com/default-profile.png";
-                    const now = new Date().toLocaleString();
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const displayName = user.displayName || "Usuario";
+                const photoURL = user.photoURL || "https://example.com/default-profile.png";
+                const now = new Date().toLocaleString();
 
-                    // Recuperar datos del usuario
-                    const userDoc = doc(db, `users/${user.uid}`);
-                    const docSnapshot = await getDoc(userDoc);
+                // Recuperar datos del usuario
+                const userDoc = doc(db, `users/${user.uid}`);
+                const docSnapshot = await getDoc(userDoc);
 
-                    if (docSnapshot.exists()) {
-                        const userData = docSnapshot.data();
-                        userName.textContent = userData.name || 'RETOM';
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    userName.textContent = userData.name || 'RETOM';
 
-                        // Establecer la foto de perfil del usuario
-                        const profilePic = document.getElementById("profilePicture");
-                        if (userData.photoURL) {
-                            try {
-                                // Si hay una URL, obtener la imagen desde Firebase Storage
-                                const profileRef = ref(storage, userData.photoURL);
-                                const url = await getDownloadURL(profileRef);
-                                profilePic.src = url;  // Establecer la imagen del perfil
-                            } catch (error) {
-                                // Si ocurre un error, mostrar una imagen predeterminada
-                                console.error("Error getting profile picture URL: ", error);
-                                profilePic.src = "default-profile.jpg";  // Imagen predeterminada
-                            }
-                        } else {
-                            // Si no hay 'photoURL', usar la imagen predeterminada
-                            profilePic.src = "default-profile.jpg";  // Imagen predeterminada 
+                    // Establecer la foto de perfil del usuario
+                    const profilePic = document.getElementById("profilePicture");
+                    if (userData.photoURL) {
+                        try {
+                            // Si hay una URL, obtener la imagen desde Firebase Storage
+                            const profileRef = ref(storage, userData.photoURL);
+                            const url = await getDownloadURL(profileRef);
+                            profilePic.src = url;  // Establecer la imagen del perfil
+                        } catch (error) {
+                            // Si ocurre un error, mostrar una imagen predeterminada
+                            console.error("Error getting profile picture URL: ", error);
+                            profilePic.src = "default-profile.jpg";  // Imagen predeterminada
                         }
+                    } else {
+                        // Si no hay 'photoURL', usar la imagen predeterminada
+                        profilePic.src = "default-profile.jpg";  // Imagen predeterminada 
                     }
-
-                    // Mostrar saludo y última conexión
-                    greeting.textContent = `¡Hola, ${displayName}!`;
-                    lastLogin.textContent = now;
-
-                    // Guardar la última conexión en Firestore
-                    await setDoc(doc(db, "users", user.uid), {
-                        lastLogin: now, 
-                        displayName: displayName
-                    }, { merge: true });
-
-                    // Habilitar los enlaces e iconos
-                    iconBoxes.forEach(icon => icon.classList.remove('disabled'));
-                    footerLinks.forEach(link => link.classList.remove('disabled'));
-                } else {
-                    // Si no hay usuario autenticado, deshabilitar los iconos y enlaces
-                    iconBoxes.forEach(icon => icon.classList.add('disabled'));
-                    footerLinks.forEach(link => link.classList.add('disabled'));
-
-                    document.body.innerHTML += `
-                        <div class="alert">
-                            No estás logueado. Por favor, <a href="login.html">inicia sesión</a>.
-                        </div>`;
                 }
-            });
+
+                // Mostrar saludo y última conexión
+                greeting.textContent = `¡Hola, ${displayName}!`;
+                lastLogin.textContent = now;
+
+                // Eliminar el guardado de la última conexión en Firestore (para evitar conflicto)
+                // Ya no guardamos la última conexión en Firestore
+
+                // Habilitar los enlaces e iconos
+                iconBoxes.forEach(icon => icon.classList.remove('disabled'));
+                footerLinks.forEach(link => link.classList.remove('disabled'));
+            } else {
+                // Si no hay usuario autenticado, deshabilitar los iconos y enlaces
+                iconBoxes.forEach(icon => icon.classList.add('disabled'));
+                footerLinks.forEach(link => link.classList.add('disabled'));
+
+                document.body.innerHTML += `
+                    <div class="alert">
+                        No estás logueado. Por favor, <a href="login.html">inicia sesión</a>.
+                    </div>`;
+            }
         });
-    </script>
+    });
+</script>
 </head>
 <body>
     <header>
