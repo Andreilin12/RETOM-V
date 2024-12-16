@@ -170,7 +170,7 @@
             text-decoration: underline;
         }
     </style>
-<script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
@@ -216,18 +216,15 @@
                     const profilePic = document.getElementById("profilePicture");
                     if (userData.photoURL) {
                         try {
-                            // Si hay una URL, obtener la imagen desde Firebase Storage
                             const profileRef = ref(storage, userData.photoURL);
                             const url = await getDownloadURL(profileRef);
-                            profilePic.src = url;  // Establecer la imagen del perfil
+                            profilePic.src = url;
                         } catch (error) {
-                            // Si ocurre un error, mostrar una imagen predeterminada
                             console.error("Error getting profile picture URL: ", error);
-                            profilePic.src = "default-profile.jpg";  // Imagen predeterminada
+                            profilePic.src = "default-profile.jpg"; // Imagen predeterminada
                         }
                     } else {
-                        // Si no hay 'photoURL', usar la imagen predeterminada
-                        profilePic.src = "default-profile.jpg";  // Imagen predeterminada 
+                        profilePic.src = "default-profile.jpg"; // Imagen predeterminada 
                     }
                 }
 
@@ -235,13 +232,11 @@
                 greeting.textContent = `¡Hola, ${displayName}!`;
                 lastLogin.textContent = now;
 
-                // Ya no guardamos la última conexión en Firestore
-
                 // Habilitar los enlaces e iconos
                 iconBoxes.forEach(icon => icon.classList.remove('disabled'));
                 footerLinks.forEach(link => link.classList.remove('disabled'));
             } else {
-                // Si no hay usuario autenticado, deshabilitar los iconos y enlaces
+                // Si no hay usuario autenticado, deshabilitar
                 iconBoxes.forEach(icon => icon.classList.add('disabled'));
                 footerLinks.forEach(link => link.classList.add('disabled'));
 
@@ -253,19 +248,27 @@
         });
     });
 
-    // Eliminar cualquier bloqueo de navegación o advertencia al salir de la página
-    window.onbeforeunload = function() {
-        return null; // Esto elimina cualquier mensaje de advertencia de cambios no guardados
-    }
-
     // Evitar que el navegador muestre un mensaje de advertencia cuando se hace clic en un enlace
     document.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', (event) => {
-            // Evitar que se active la advertencia por si la página tiene cambios no guardados
-            window.onbeforeunload = null;
+            // No se requiere lógica especial aquí
         });
     });
+
+    // Bloquear el botón de retroceso del navegador y las teclas
+    function blockBackNavigation() {
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, null, window.location.href); // Previene el retroceso
+        };
+    }
+
+    // Inicializar funciones
+    window.onload = function() {
+        blockBackNavigation();
+    };
 </script>
+
 </head>
 <body>
     <header>
