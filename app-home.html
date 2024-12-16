@@ -173,7 +173,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -235,7 +235,6 @@
                 greeting.textContent = `¡Hola, ${displayName}!`;
                 lastLogin.textContent = now;
 
-                // Eliminar el guardado de la última conexión en Firestore (para evitar conflicto)
                 // Ya no guardamos la última conexión en Firestore
 
                 // Habilitar los enlaces e iconos
@@ -253,61 +252,59 @@
             }
         });
     });
+
+    // Eliminar cualquier bloqueo de navegación o advertencia al salir de la página
+    window.onbeforeunload = null;
 </script>
 </head>
 <body>
     <header>
         <div class="profile">
-            <img id="profilePicture" src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727" alt="Foto de perfil">
+            <img id="profilePicture" src="https://example.com/default-profile.png" alt="Foto de perfil">
             <h4 id="userName">Usuario</h4>
         </div>
         <img src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/RETOM%20COMPLETO%20(2).png?alt=media&token=bcb475a5-edf6-494a-96e5-ca8f0a8ae005" alt="Logo" class="logo">
-        <div class="search-container">
-            <a href="search.html"><i class="fa fa-search"></i></a>
-        </div> 
-    </header>
+<div class="search-container">
+    <a href="search.html"><i class="fa fa-search"></i></a>
+</div> 
+</header>
 
-    <div class="greeting">
-        <h2>¡Hola, Usuario!</h2>
-        <p>Última conexión: <span id="lastLogin">Fecha y hora no disponible</span></p>
-    </div>
+<div class="greeting">
+    <h2>¡Hola, Usuario!</h2>
+    <p>Última conexión: <span id="lastLogin">Fecha y hora no disponible</span></p>
+</div>
 
-    <div class="icon-container">
-        <a href="formulario Agregar Negocio.html" class="icon-box"> 
-            <i class="fas fa-building"></i>
-            <h3>Agregar Negocio</h3>
-        </a>
+<div class="icon-container">
+    <a href="formulario Agregar Negocio.html" class="icon-box"> 
+        <i class="fas fa-building"></i>
+        <h3>Agregar Negocio</h3>
+    </a>
 
-        <a href="formulario Agregar Producto.html" class="icon-box"> 
-            <i class="fas fa-box-open"></i>
-            <h3>Agregar Producto</h3>
-        </a> 
-  
-  
-    </div>
+    <a href="formulario Agregar Producto.html" class="icon-box"> 
+        <i class="fas fa-box-open"></i>
+        <h3>Agregar Producto</h3>
+    </a> 
+</div>
 
+<div class="icon-container">
+    <a href="crear-Facturas.html" class="icon-box">
+        <i class="fas fa-receipt"></i> 
+        <h3>Gestion de Facturas</h3>
+    </a>
 
-    <div class="icon-container">
- 
-        <a href="crear-Facturas.html" class="icon-box">
-            <i class="fas fa-receipt"></i> 
-            <h3>Gestion de Facturas</h3>
-        </a>
+    <a href="gestion-de-colaboradores.html" class="icon-box">
+        <i class="fas fa-users"></i>
+        <h3>Gestion de Colaboradores</h3>
+    </a>
+</div>
 
-        <a href="gestion-de-colaboradores.html" class="icon-box">
-            <i class="fas fa-users"></i>
-            <h3>Gestion de Colaboradores</h3>
-        </a>
-  
-    </div>
-
-    <div class="footer-menu">
-        <a href="inventario.html"><i class="fas fa-boxes"></i></a>
-        <a href="productos.html"><i class="fas fa-th"></i></a>
-        <a href="agregar-producto.html" class="add-product"><i class="fas fa-plus"></i></a>
-        <a href="historias.html"><i class="fas fa-history"></i></a>
-        <a href="configuraciones.html"><i class="fas fa-cogs"></i></a>
-    </div>
+<div class="footer-menu">
+    <a href="inventario.html"><i class="fas fa-boxes"></i></a>
+    <a href="productos.html"><i class="fas fa-th"></i></a>
+    <a href="agregar-producto.html" class="add-product"><i class="fas fa-plus"></i></a>
+    <a href="historias.html"><i class="fas fa-history"></i></a>
+    <a href="configuraciones.html"><i class="fas fa-cogs"></i></a>
+</div>
 </body>
 </html>
 
