@@ -317,20 +317,22 @@
 
 
  <!-- retroceder bloqueo -->
-    <script>
-        // Función para prevenir que el usuario retroceda
+   <script>
+        // Bloquear el botón de retroceso del navegador y las teclas
         function blockBackNavigation() {
+            // Bloqueamos el retroceso en el historial
             window.history.pushState(null, null, window.location.href);
             window.onpopstate = function () {
                 window.history.pushState(null, null, window.location.href);  // Previene el retroceso
             };
         }
 
-        // Bloquear la tecla de retroceso (Backspace) en el teclado
+        // Bloquear la tecla de retroceso (Backspace)
         function blockBackspace() {
             document.addEventListener('keydown', function(event) {
-                if (event.key === 'Backspace') {
-                    event.preventDefault();  // Bloquea la tecla de retroceso
+                // Bloquear Backspace y las teclas de retroceso del navegador
+                if (event.key === 'Backspace' || event.key === 'ArrowLeft') {
+                    event.preventDefault();  // Bloquea el retroceso
                 }
             });
         }
@@ -338,12 +340,12 @@
         // Bloquear la acción de retroceder al intentar salir de la página
         function blockUnload() {
             window.addEventListener('beforeunload', function (event) {
-                // Personaliza el mensaje, pero algunos navegadores no lo mostrarán
-                event.returnValue = '¿Estás seguro de que quieres abandonar esta página?';
+                // Este mensaje solo aparece en algunos navegadores
+                event.returnValue = '¿Estás seguro de que deseas salir?';
             });
         }
 
-        // Llamamos a las funciones para bloquear las interacciones
+        // Inicializar las funciones
         window.onload = function() {
             blockBackNavigation();
             blockBackspace();
