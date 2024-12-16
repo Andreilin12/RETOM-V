@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Productos Vendidos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Incluir Font Awesome para usar iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General body styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            color: #eaeaea;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 1200px;
+            background-color: #2c3e50;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            color: #66f0ff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: #66f0ff;
+        }
+
+        td {
+            background-color: #2c3e50;
+            color: #eaeaea;
+        }
+
+        td:hover {
+            background-color: #444;
+            cursor: pointer;
+        }
+
+        /* Estilos para el ícono flotante de impresión */
+        .print-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: #66f0ff;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Media Query para ocultar el ícono de impresión durante la impresión */
+        @media print {
+            .print-icon {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ícono de impresión flotante -->
+    <i class="fas fa-print print-icon" onclick="window.print()"></i>
+
+    <div class="container">
+        <h1>Reporte de Productos Vendidos</h1>
+
+        <div class="section">
+            <h2>Productos Más Vendidos</h2>
+            <canvas id="bestSellingChart"></canvas>
+            <table id="bestSellingTable">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad Vendida</th>
+                    <th>Fecha</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            query,
+            getDocs,
+            orderBy
+        } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+            authDomain: "inventario-35d6b.firebaseapp.com",
+            projectId: "inventario-35d6b",
+            storageBucket: "inventario-35d6b.appspot.com",
+            messagingSenderId: "266100399659",
+            appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const bestSellingTable = document.getElementById("bestSellingTable");
+        const bestSellingChartCtx = document.getElementById("bestSellingChart").getContext("2d");
+
+        const getSalesData = async () => {
+            const salesRef = collection(db, "salesHistory");
+            const salesQuery = query(salesRef, orderBy("date", "desc"));
+            const querySnapshot = await getDocs(salesQuery);
+
+            const salesData = {};
+
+            querySnapshot.forEach(doc => {
+                const sale = doc.data();
+                const date = sale.date ? sale.date.toDate().toLocaleDateString() : "Desconocida";
+
+                if (!sale.productName || !sale.quantitySold) {
+                    return; // Si falta alguno de estos campos, ignorar el registro
+                }
+
+                if (!salesData[sale.productName]) {
+                    salesData[sale.productName] = [];
+                }
+
+                salesData[sale.productName].push({ date, quantitySold: sale.quantitySold });
+            });
+
+            return salesData;
+        };
+
+        const renderChart = (salesData) => {
+            const products = Object.keys(salesData);
+            const quantities = products.map(product => {
+                return salesData[product].reduce((acc, sale) => acc + sale.quantitySold, 0);
+            });
+
+            const sortedData = Object.entries(salesData)
+                .sort((a, b) => b[1].reduce((acc, sale) => acc + sale.quantitySold, 0) - a[1].reduce((acc, sale) => acc + sale.quantitySold, 0));
+
+            const topSellingProducts = sortedData.slice(0, 5);
+
+            new Chart(bestSellingChartCtx, {
+                type: "bar",
+                data: {
+                    labels: topSellingProducts.map(item => item[0]),
+                    datasets: [{
+                        label: 'Cantidad Vendida',
+                        data: topSellingProducts.map(item => item[1].reduce((acc, sale) => acc + sale.quantitySold, 0)),
+                        backgroundColor: '#00d2ff',
+                        borderColor: '#007bb5',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#333'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#333'
+                            }
+                        }
+                    }
+                }
+            });
+
+            renderTable(topSellingProducts);
+        };
+
+        const renderTable = (topSellingProducts) => {
+            bestSellingTable.innerHTML = "<tr><th>Producto</th><th>Cantidad Vendida</th><th>Fecha</th></tr>";
+
+            topSellingProducts.forEach(([product, sales]) => {
+                sales.forEach(sale => {
+                    const row = bestSellingTable.insertRow();
+                    row.insertCell(0).textContent = product;
+                    row.insertCell(1).textContent = sale.quantitySold;
+                    row.insertCell(2).textContent = sale.date;
+                });
+            });
+        };
+
+        (async function loadData() {
+            const salesData = await getSalesData();
+            renderChart(salesData);
+        })();
+    </script>
+
+</body>
+</html>
