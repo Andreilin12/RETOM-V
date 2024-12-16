@@ -254,7 +254,17 @@
     });
 
     // Eliminar cualquier bloqueo de navegación o advertencia al salir de la página
-    window.onbeforeunload = null;
+    window.onbeforeunload = function() {
+        return null; // Esto elimina cualquier mensaje de advertencia de cambios no guardados
+    }
+
+    // Evitar que el navegador muestre un mensaje de advertencia cuando se hace clic en un enlace
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (event) => {
+            // Evitar que se active la advertencia por si la página tiene cambios no guardados
+            window.onbeforeunload = null;
+        });
+    });
 </script>
 </head>
 <body>
