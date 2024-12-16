@@ -58,8 +58,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, getDocs, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -71,13 +70,10 @@
         appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const firestore = getFirestore(app);
-    const storage = getStorage(app);
 
-    // Manejar inicio de sesión
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -91,77 +87,25 @@
         }
     });
 
-    // Cambios de estado de autenticación
-    onAuthStateChanged(auth, async (user) => { 
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            document.querySelector('.login-container').style.display = 'none';
-            document.querySelector('.home-container').style.display = 'block';
+            // Registro en el historial con el nombre del usuario, fecha y hora
+            const userName = user.email; // Puedes usar el nombre o correo del usuario
+            const loginTime = new Date().toISOString();
 
-            // Recuperar datos del usuario
-            const userDoc = doc(firestore, `users/${user.uid}`);
-            const docSnapshot = await getDoc(userDoc);
-            if (docSnapshot.exists()) {
-                const userData = docSnapshot.data();
-                document.getElementById('userName').textContent = userData.name || 'RETOM';
-                
-                // Set user profile picture
-                const profilePic = document.getElementById("profilePicture");
-                if (userData.photoURL) {
-                    const profileRef = ref(storage, userData.photoURL);
-                    getDownloadURL(profileRef).then((url) => {
-                        profilePic.src = url;
-                    }).catch((error) => {
-                        console.error("Error getting profile picture URL: ", error);
-                    });
-                } else {
-                    profilePic.src = "default-profile.jpg"; // Default image
-                }
-            }
+            // Guardar el historial en Firestore
+            await setDoc(doc(firestore, "loginHistory", user.uid), {
+                userName: userName,
+                loginTime: loginTime
+            });
 
-            // Redirigir a la página principal
-            window.location.href = "app-home.html"; // Redirección a app-home.html
+            console.log("Historial guardado:", userName, loginTime);
 
-            // Alerta de vencimiento de productos
-            checkAlerts();
-        } else {
-            document.querySelector('.login-container').style.display = 'block';
-            document.querySelector('.home-container').style.display = 'none';
+            // Redirigir al usuario a app-home.html
+            window.location.href = "app-home.html";
         }
     });
-
-    function showAlert(message) {
-        const alertBox = document.getElementById("alert");
-        alertBox.innerHTML = message;
-        alertBox.classList.add("show");
-
-        setTimeout(() => {
-            alertBox.classList.remove("show");
-        }, 3000);
-    }
-
-    function checkAlerts() {
-        onSnapshot(collection(firestore, "businesses"), async (snapshot) => {
-            let alertContent = "";
-            const currentDate = new Date();
-
-            for (const businessDoc of snapshot.docs) {
-                const businessName = businessDoc.data().name;
-                const productsQuerySnapshot = await getDocs(collection(firestore, "businesses", businessDoc.id, "products"));
-                productsQuerySnapshot.forEach((productDoc) => {
-                    const productData = productDoc.data();
-                    const expiryDate = productData.expiryDate.toDate();
-                    if (expiryDate <= currentDate) {
-                        alertContent += `${productData.name} de ${businessName} ha expirado.<br>`;
-                    }
-                });
-            }
-            if (alertContent) {
-                showAlert(alertContent);
-            }
-        });
-    }
 </script>
-
 
 </body>
 </html>
