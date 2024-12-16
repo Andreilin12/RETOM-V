@@ -313,3 +313,21 @@
     </div>
 </body>
 </html>
+
+
+    <script type="text/javascript">
+        // Desactivar el botón de retroceso
+        window.history.forward();
+        
+        // Deshabilitar el retroceso de la página (en la mayoría de los casos)
+        window.onpopstate = function(event) {
+            window.history.forward();
+        };
+        
+        // Asegurarse de que no se pueda hacer retroceder usando la tecla "Atrás"
+        window.addEventListener("keydown", function(e) {
+            if (e.key === "Backspace" || e.key === "ArrowLeft") {
+                e.preventDefault();  // Prevenir la acción
+            }
+        });
+    </script>
