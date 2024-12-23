@@ -359,3 +359,18 @@
             blockUnload();
         };
     </script>
+
+<script>
+        // Función para evitar el retroceso
+        function preventBack() {
+            window.history.pushState(null, '', window.location.href);
+            window.onpopstate = function() {
+                window.history.pushState(null, '', window.location.href);
+                alert("El retroceso está deshabilitado en esta página.");
+            };
+        }
+
+        // Llamar a la función al cargar la página
+        window.onload = preventBack;
+</script>
+
