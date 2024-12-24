@@ -47,7 +47,7 @@
 
         h2 {
             font-size: 1.6rem;
-            color: #66f0ff;
+            color: #15a086;
             margin-bottom: 15px;
             text-align: center;
         }
@@ -80,7 +80,7 @@
         }
 
         td:hover {
-            background-color: #444;
+            background-color: #15a086;
             cursor: pointer;
         }
 
@@ -119,6 +119,7 @@
                     <th>Producto</th>
                     <th>Cantidad Vendida</th>
                     <th>Fecha</th>
+                    <th>Tipo de Pago</th> <!-- Nueva columna para 'paymentType' -->
                 </tr>
             </table>
         </div>
@@ -160,7 +161,7 @@
                 const sale = doc.data();
                 const date = sale.date ? sale.date.toDate().toLocaleDateString() : "Desconocida";
 
-                if (!sale.productName || !sale.quantitySold) {
+                if (!sale.productName || !sale.quantitySold || !sale.paymentType) {
                     return; // Si falta alguno de estos campos, ignorar el registro
                 }
 
@@ -168,7 +169,7 @@
                     salesData[sale.productName] = [];
                 }
 
-                salesData[sale.productName].push({ date, quantitySold: sale.quantitySold });
+                salesData[sale.productName].push({ date, quantitySold: sale.quantitySold, paymentType: sale.paymentType });
             });
 
             return salesData;
@@ -185,15 +186,15 @@
 
             const topSellingProducts = sortedData.slice(0, 5);
 
-            new Chart(bestSellingChartCtx, {
+            new Chart(bestSellingChartCtx, { 
                 type: "bar",
-                data: {
+                data: { 
                     labels: topSellingProducts.map(item => item[0]),
-                    datasets: [{
+                    datasets: [{ 
                         label: 'Cantidad Vendida',
-                        data: topSellingProducts.map(item => item[1].reduce((acc, sale) => acc + sale.quantitySold, 0)),
-                        backgroundColor: '#00d2ff',
-                        borderColor: '#007bb5',
+                        data: topSellingProducts.map(item => item[1].reduce((acc, sale) => acc + sale.quantitySold, 0)), 
+                        backgroundColor: '#15a086',
+                        borderColor: '#16e086',
                         borderWidth: 1
                     }]
                 },
@@ -220,7 +221,7 @@
         };
 
         const renderTable = (topSellingProducts) => {
-            bestSellingTable.innerHTML = "<tr><th>Producto</th><th>Cantidad Vendida</th><th>Fecha</th></tr>";
+            bestSellingTable.innerHTML = "<tr><th>Producto</th><th>Cantidad Vendida</th><th>Fecha</th><th>Tipo de Pago</th></tr>"; // Nueva columna en el encabezado
 
             topSellingProducts.forEach(([product, sales]) => {
                 sales.forEach(sale => {
@@ -228,6 +229,7 @@
                     row.insertCell(0).textContent = product;
                     row.insertCell(1).textContent = sale.quantitySold;
                     row.insertCell(2).textContent = sale.date;
+                    row.insertCell(3).textContent = sale.paymentType; // Mostrar el tipo de pago
                 });
             });
         };
