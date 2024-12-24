@@ -148,7 +148,7 @@
     <a href="#"><i class="fa-solid fa-cart-plus icon"></i>-->
   </footer>
 
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getFirestore,
@@ -159,7 +159,10 @@
       getDocs,
       updateDoc,
       doc,
-      getDoc
+      getDoc,
+      addDoc,
+      Timestamp,
+      where
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -218,6 +221,41 @@
       invoiceTotal.textContent = `Total con ITBIS: $${total.toFixed(2)}`;
     };
 
+    const recordSaleHistory = async (item, paymentTypeValue) => {
+      try {
+        // Verificamos si el producto ya existe en el historial
+        const salesHistoryRef = collection(db, "salesHistory");
+        const q = query(salesHistoryRef, where("productName", "==", item.name), where("paymentType", "==", paymentTypeValue));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // Si el producto ya está registrado, sumamos la cantidad
+          querySnapshot.forEach(async (doc) => {
+            const existingSale = doc.data();
+            const newQuantity = existingSale.quantitySold + item.quantity;
+
+            // Actualizamos la cantidad en el historial
+            await updateDoc(doc.ref, { quantitySold: newQuantity });
+            console.log(`Cantidad actualizada para ${item.name}, nueva cantidad: ${newQuantity}`);
+          });
+        } else {
+          // Si no existe, agregamos una nueva entrada al historial
+          const saleData = {
+            productName: item.name,
+            quantitySold: item.quantity,
+            paymentType: paymentTypeValue,
+            date: Timestamp.now(), // Fecha y hora exacta del pago
+          };
+
+          // Guardamos el historial en la colección "salesHistory"
+          await addDoc(salesHistoryRef, saleData);
+          console.log(`Historial registrado para ${item.name}`);
+        }
+      } catch (error) {
+        console.error("Error al registrar el historial de ventas:", error);
+      }
+    };
+
     const processPayment = async (paymentTypeValue) => {
       try {
         if (!invoice) {
@@ -242,6 +280,9 @@
 
             // Actualizamos la cantidad en Firebase
             await updateDoc(productRef, { quantity: newQuantity });
+
+            // Registramos el historial de venta para cada producto
+            await recordSaleHistory(item, paymentTypeValue);
           }
         }
 
@@ -249,18 +290,20 @@
         window.print(); // Imprime el ticket automáticamente
       } catch (error) {
         console.error("Error al procesar el pago:", error);
-      }
-    };
+      } 
+    }; 
 
     btnEfectivo.addEventListener("click", () => processPayment("Efectivo"));
     btnTarjeta.addEventListener("click", () => processPayment("Tarjeta"));
 
-    getLatestInvoice();
-  </script>
+    getLatestInvoice();  
+</script>
+
+
 </body>
-</html>
+</html> 
 
-
+ 
 
 
 
