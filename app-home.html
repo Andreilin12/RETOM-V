@@ -137,10 +137,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: transform 0.3s ease; /* Efecto en el icono */
         }
 
         .footer-menu .add-product:hover {
             background-color: #16a085;
+                transform: rotate(180deg); /* Hace rotar el icono */
+
         }
 
         .footer-menu a i {
@@ -373,4 +376,3 @@
         // Llamar a la función al cargar la página
         window.onload = preventBack;
 </script>
-
