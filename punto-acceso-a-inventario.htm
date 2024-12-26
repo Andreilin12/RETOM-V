@@ -74,8 +74,8 @@
     <button class="back-button" onclick="goBack()">
         <i class="fas fa-arrow-left"></i> Volver
     </button>  
-    <h1>Inventario</h1>
-    <button id="restrictedButton" onclick="window.location.href='Punto-gestion-de-producto.html'">
+    <h1>Inventarios</h1>
+    <button id="restrictedButton" onclick="window.location.href='permisso-producto.html'">
         <i class="fas fa-check-circle" style="font-size: 20px; color: #fff;"></i> Consultar Productos Editados
     </button>
     <div id="alert" class="alert"></div>
@@ -122,18 +122,18 @@
                     console.log("Datos del usuario:", data); 
                     
                     // Verificar permisos
-                    if (data.grantedUsers && data.grantedUsers.includes(userId)) {
-                        window.location.href = 'historiales.html'; // Redirigir a historiales.html
+                    if (data.admproducto && data.admproducto.includes(userId)) {
+                        window.location.href = 'Punto-gestion-de-producto.html'; // Redirigir a gestion-productos.html
                     } else {
                         document.getElementById("restrictedButton").style.display = "none"; // Ocultar el botón
                         showAlert("No tienes permiso para realizar esta acción.");
                     }
                 } else { 
                     showAlert("No se encontraron datos para el usuario."); 
-                    console.log("No se encontraron datos para el usuario:", userRef);
+                    console.log("No se encontraron datos para el usuario:", userRef); 
                 }
             }, (error) => {
-                console.error("Error al obtener datos del usuario: ", error);
+                console.error("Error al obtener datos del usuario: ", error); 
                 showAlert("Ocurrió un error al verificar permisos.");
             }); 
         }
@@ -143,7 +143,7 @@
             alertDiv.innerText = message;
             alertDiv.style.display = "block"; // Mostrar la alerta
             setTimeout(() => {
-                alertDiv.style.display = "none"; // Ocultar después de 5 segundos 
+                alertDiv.style.display = "none"; // Ocultar después de 5 segundos  
             }, 5000);
         }
     </script> 
@@ -151,7 +151,7 @@
 </html>
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script>
+<script>  
     function goBack() {
         window.history.back();
     }
@@ -161,7 +161,8 @@
 
 
 
-  <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
+
+       <!-- BLOQUEO DE CLIC DERECHO, F12 ETC. -->
 
   <script>
         // Bloquear el clic derecho
@@ -233,6 +234,7 @@
             }
         });
     </script>
+
 
 
 
