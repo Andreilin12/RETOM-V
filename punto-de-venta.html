@@ -525,22 +525,77 @@ footer .icon:hover {
 </script>
 
 <style>
-  .numeric-keyboard {
+ .numeric-keyboard {
     display: none;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 10px;
-  }
+    gap: 12px;
+    margin-top: 15px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
 
-  .numeric-btn {
-    padding: 10px;
-    font-size: 16px;
+.numeric-btn {
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(145deg, #2c3e50, #222);
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
-  }
+    text-align: center;
+    box-shadow: 0 0 8px rgba(22, 224, 136);
+    transition: all 0.3s ease-in-out;
+}
 
-  #backspaceBtn, #acceptBtn {
-    grid-column: span 3;
-  }
+.numeric-btn:hover {
+    background: #16e086;
+    color: #000;
+    box-shadow: 0 0 15px rgba(22, 224, 134);
+    transform: scale(1.1);
+}
+
+/* Botón de borrar con el mismo tamaño que los números */
+#backspaceBtn {
+    background: #ff004c;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 76, 0.6);
+}
+
+#backspaceBtn:hover {
+    background: #ff3366;
+    box-shadow: 0 0 20px rgba(255, 0, 76, 1); 
+    transform: scale(1.1);
+}
+
+/* Botón de aceptar alineado al centro y más abajo */
+.accept-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+#acceptBtn {
+    background: #15a086;
+    color: #fff;
+    font-size: 18px;
+    padding: 15px 50px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(21, 160, 135);
+}
+
+#acceptBtn:hover {
+    background: #16e086;
+    box-shadow: 0 0 20px rgba(22, 224, 134);
+    transform: scale(1.05);
+}
+
+
 </style>
 
 
