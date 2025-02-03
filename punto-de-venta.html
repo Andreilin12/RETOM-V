@@ -12,6 +12,10 @@ body {
   background: linear-gradient(135deg, #2c3e50, #16e086, #2c3e50);
   color: #fff;
   margin: 0;
+  padding: 0; /* Asegúrate de que no haya margen */
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Ocupa toda la altura de la ventana */
 }
 
 header {
@@ -21,6 +25,10 @@ header {
   background: rgba(44, 62, 80);
   padding: 15px 30px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  position: fixed; /* Fijo en la parte superior */
+  top: 0;
+  width: 100%; /* Asegúrate de que ocupe todo el ancho */
+  z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
 }
 
 .icon {
@@ -38,14 +46,16 @@ header {
 /* Layout principal */
 main {
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 120px); /* Espacio entre el header y el footer */
+  margin-top: 60px; /* Altura del header */
+  margin-bottom: 60px; /* Altura del footer */
   overflow: hidden;
 }
 
 .left-section,
 .right-section {
   width: 50%;
-  overflow-y: auto;
+  overflow-y: auto; /* Permitir desplazamiento vertical */
   padding: 20px;
 }
 
@@ -153,10 +163,11 @@ footer {
   align-items: center;
   background: rgba(45, 52, 54, 0.9);
   padding: 15px 30px;
-  position: fixed;
+  position: fixed; /* Fijo en la parte inferior */
   bottom: 0;
-  width: 100%;
+  width: 100%; /* Asegúrate de que ocupe todo el ancho */
   box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
 }
 
 footer .icon {
@@ -204,19 +215,19 @@ footer .icon:hover {
   text-transform: uppercase;
 }
 
- /* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
-    * {
-        -webkit-user-select: none; /* Safari */
-        -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* IE 10+ */
-        user-select: none; /* estándar */
+/* Desactivar la selección de texto y el efecto de arrastre en todos los elementos */
+* {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* estándar */
 
-        -webkit-user-drag: none; /* Safari */
-        -khtml-user-drag: none; /* Konqueror HTML */
-        -moz-user-drag: none; /* Firefox */
-        -o-user-drag: none; /* Opera */
-        user-drag: none; /* estándar */
-    }
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* estándar */
+}
 
 
   </style>
@@ -234,7 +245,23 @@ footer .icon:hover {
     <!-- Left Section: Search and Invoice -->
     <section class="left-section">
       <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Buscar por EAN o UPC">
+        <input type="text" id="searchInput" placeholder="Buscar por EAN o UPC" autofocus>
+        <input type="text" id="searchByNameInput" placeholder="Buscar por nombre del producto">
+      </div>
+      <!-- Teclado numérico personalizado -->
+      <div id="numericKeyboard" class="numeric-keyboard">
+        <button class="numeric-btn" data-value="1">1</button>
+        <button class="numeric-btn" data-value="2">2</button>
+        <button class="numeric-btn" data-value="3">3</button>
+        <button class="numeric-btn" data-value="4">4</button>
+        <button class="numeric-btn" data-value="5">5</button>
+        <button class="numeric-btn" data-value="6">6</button>
+        <button class="numeric-btn" data-value="7">7</button>
+        <button class="numeric-btn" data-value="8">8</button>
+        <button class="numeric-btn" data-value="9">9</button>
+        <button class="numeric-btn" data-value="0">0</button>
+        <button class="numeric-btn" id="backspaceBtn">⌫</button>
+        <button class="numeric-btn" id="acceptBtn">Aceptar</button>
       </div>
       <div class="invoice" id="invoice">
         <h3>Factura Actual</h3>
@@ -249,14 +276,11 @@ footer .icon:hover {
       <h3>Todos los Productos</h3>
       <div id="productList" class="products-list"></div>
     </section>
-  </main>
+</main>
 
-  <footer>
-<!--    <a href="#"><i class="fa-solid fa-house icon"></i>-->
-    <a href="faturacion.html"><i class="fa-solid fa-cart-plus icon"></i>
-<!--    <a href="#"><i class="fa-solid fa-barcode icon"></i>
-    <a href="#"><i class="fa-solid fa-cogs icon"></i>-->
-  </footer>
+<footer>
+    <a href="faturacion.html"><i class="fa-solid fa-cart-plus icon"></i></a>
+</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -266,11 +290,9 @@ footer .icon:hover {
     getDocs,
     query,
     where,
-    onSnapshot,
-    doc,
-    updateDoc,
     addDoc,
-    deleteDoc,
+    setDoc,
+    doc,
   } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -286,63 +308,127 @@ footer .icon:hover {
   const db = getFirestore(app);
 
   const searchInput = document.getElementById("searchInput");
+  const searchByNameInput = document.getElementById("searchByNameInput");
   const productList = document.getElementById("productList");
   const invoiceItems = document.getElementById("invoiceItems");
   const invoiceTotal = document.getElementById("invoiceTotal");
   const payButton = document.getElementById("payButton");
+  const numericKeyboard = document.getElementById("numericKeyboard");
+  const numericButtons = document.querySelectorAll(".numeric-btn");
+  const backspaceBtn = document.getElementById("backspaceBtn");
+  const acceptBtn = document.getElementById("acceptBtn");
 
   let invoice = [];
   let totalPrice = 0;
 
-  const renderProducts = async (searchTerm = "") => {
+  // Almacena la referencia al documento que contendrá el total
+  const totalRef = doc(db, "totals", "currentTotal"); // Cambia "totals" y "currentTotal" según tu estructura
+
+  // Función para actualizar el total en Firebase
+  const updateTotalInFirebase = async () => {
+    try {
+      await setDoc(totalRef, { total: totalPrice.toFixed(2) }); // Reemplaza el total
+    } catch (error) {
+      console.error("Error al actualizar el total en Firebase:", error);
+    }
+  };
+
+  searchInput.addEventListener("click", () => {
+    numericKeyboard.style.display = "grid";
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!searchInput.contains(e.target) && !numericKeyboard.contains(e.target)) {
+      numericKeyboard.style.display = "none";
+    }
+  });
+
+  numericButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.id !== "backspaceBtn" && button.id !== "acceptBtn") {
+        searchInput.value += button.getAttribute("data-value");
+      }
+    });
+  });
+
+  backspaceBtn.addEventListener("click", () => {
+    searchInput.value = searchInput.value.slice(0, -1);
+  });
+
+  acceptBtn.addEventListener("click", () => {
+    renderProducts(searchInput.value, "");
+    numericKeyboard.style.display = "none";
+  });
+
+  const renderProducts = async (eanTerm = "", nameTerm = "") => {
     try {
       const businessesRef = collection(db, "businesses");
       const businessesSnapshot = await getDocs(businessesRef);
+
+      productList.innerHTML = "";
 
       if (businessesSnapshot.empty) {
         productList.innerHTML = "<p>No hay productos disponibles.</p>";
         return;
       }
 
-      productList.innerHTML = "";
+      businessesSnapshot.forEach(async (businessDoc) => {
+        const productsRef = collection(db, "businesses", businessDoc.id, "products");
+        let productsQuery = query(productsRef);
 
-      businessesSnapshot.forEach((businessDoc) => {
-        const businessName = businessDoc.id;
-        const productsRef = collection(db, "businesses", businessName, "products");
-        let productsQuery = productsRef;
+        if (eanTerm) {
+          productsQuery = query(productsRef, where("eanUpcCode", "==", eanTerm));
+        } else if (nameTerm) {
+          productsQuery = query(productsRef, where("name", ">=", nameTerm), where("name", "<=", nameTerm + '\uf8ff'));
+        }
 
-        onSnapshot(productsQuery, (querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            const product = doc.data();
-            const productDiv = document.createElement("div");
-            productDiv.classList.add("product-item");
-            productDiv.innerHTML = `
-              <div>${product.name}</div>
-              <div>Precio: $${product.pricePerUnit}</div>
-              <div>Stock: ${product.quantity}</div>
-              <div>Código EAN/UPC: ${product.eanUpcCode}</div>
-            `;
-            productDiv.addEventListener("click", () => updateInvoice(product, businessName, doc.id));
-            productList.appendChild(productDiv);
-          });
+        const querySnapshot = await getDocs(productsQuery);
+        querySnapshot.forEach((doc) => {
+          const product = doc.data();
+          const productDiv = document.createElement("div");
+          productDiv.classList.add("product-item");
+          productDiv.innerHTML = `
+            <div>${product.name}</div>
+            <div>Precio: $${product.pricePerUnit}</div>
+            <div>Stock: ${product.quantity}</div>
+            <div>Código EAN/UPC: ${product.eanUpcCode}</div>
+          `;
+          productDiv.addEventListener("click", () => updateInvoice(product, businessDoc.id, doc.id));
+          productList.appendChild(productDiv);
         });
       });
 
-      if (searchTerm) addToInvoiceBySearch(searchTerm);
+      if (eanTerm) addToInvoiceBySearch(eanTerm);
     } catch (error) {
       console.error("Error al obtener los productos:", error);
     }
   };
 
-  const addToInvoiceBySearch = (searchTerm) => {
+  searchInput.addEventListener("input", (e) => {
+    if (e.target.value.trim() === "") {
+      productList.innerHTML = ""; // Limpia la lista de productos si el campo está vacío
+      return;
+    }
+    renderProducts(e.target.value, searchByNameInput.value);
+  });
+
+  searchByNameInput.addEventListener("input", (e) => {
+    if (e.target.value.trim() === "") {
+      productList.innerHTML = ""; // Limpia la lista de productos si el campo está vacío
+      return;
+    }
+    renderProducts(searchInput.value, e.target.value);
+  });
+
+  const addToInvoiceBySearch = (eanTerm) => {
     const businessesRef = collection(db, "businesses");
 
     getDocs(businessesRef).then((businessesSnapshot) => {
       businessesSnapshot.forEach((businessDoc) => {
         const productsRef = collection(db, "businesses", businessDoc.id, "products");
-        const productsQuery = query(productsRef, where("eanUpcCode", "==", searchTerm));
+        const productsQuery = query(productsRef, where("eanUpcCode", "==", eanTerm));
 
-        onSnapshot(productsQuery, (querySnapshot) => {
+        getDocs(productsQuery).then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             const product = doc.data();
             updateInvoice(product, businessDoc.id, doc.id);
@@ -360,7 +446,9 @@ footer .icon:hover {
       invoice.push({ ...product, businessName, productId, quantity: 1 });
     }
 
-    totalPrice += product.pricePerUnit * 1.18;
+    const profitPercentage = product.profitPercentage || 10; // Usar 10% si no está definido
+    const priceWithProfit = product.pricePerUnit * (1 + profitPercentage / 100);
+    totalPrice += priceWithProfit * 1.18; // Agregar IVA
     renderInvoice();
   };
 
@@ -369,24 +457,31 @@ footer .icon:hover {
     totalPrice = 0;
 
     invoice.forEach((item) => {
+      const profitPercentage = item.profitPercentage || 10; // Usar 10% si no está definido
+      const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+      const totalItemPrice = priceWithProfit * 1.18 * item.quantity;
+
       const productDiv = document.createElement("div");
       productDiv.classList.add("invoice-item");
       productDiv.innerHTML = `
-        ${item.name} x ${item.quantity} - $${(item.pricePerUnit * 1.18 * item.quantity).toFixed(2)}
+        ${item.name} x ${item.quantity} - $${totalItemPrice.toFixed(2)}
         <button class="remove-btn" onclick="removeProduct('${item.productId}')">Eliminar</button>
       `;
       invoiceItems.appendChild(productDiv);
-      totalPrice += item.pricePerUnit * 1.18 * item.quantity;
+      totalPrice += totalItemPrice;
     });
 
     invoiceTotal.textContent = `Total: $${totalPrice.toFixed(2)}`;
+    updateTotalInFirebase(); // Actualiza el total en Firebase cada vez que se renderiza la factura
   };
 
   window.removeProduct = (productId) => {
     const productIndex = invoice.findIndex((item) => item.productId === productId);
     if (productIndex > -1) {
+      const profitPercentage = invoice[productIndex].profitPercentage || 10;
+      const priceWithProfit = invoice[productIndex].pricePerUnit * (1 + profitPercentage / 100);
+      totalPrice -= priceWithProfit * 1.18;
       invoice[productIndex].quantity -= 1;
-      totalPrice -= invoice[productIndex].pricePerUnit * 1.18;
       if (invoice[productIndex].quantity === 0) {
         invoice.splice(productIndex, 1);
       }
@@ -412,20 +507,41 @@ footer .icon:hover {
       invoice = [];
       totalPrice = 0;
       renderInvoice();
+
+      // Limpiar el total en Firebase al pagar
+      await setDoc(totalRef, { total: "0.00" }); // Establece el total a cero
     } catch (error) {
       console.error("Error al guardar la factura:", error);
     }
   });
 
-  searchInput.addEventListener("input", (e) => {
-    renderProducts(e.target.value);
-  });
+  // Enfocar automáticamente el campo de búsqueda EAN/UPC al cargar la página
+  window.onload = function() {
+    searchInput.focus();
+    searchInput.select(); // Selecciona el campo para que el teclado se abra
+  };
 
   renderProducts();
 </script>
 
-</body>
-</html>
+<style>
+  .numeric-keyboard {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .numeric-btn {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #backspaceBtn, #acceptBtn {
+    grid-column: span 3;
+  }
+</style>
 
 
 
