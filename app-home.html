@@ -377,3 +377,74 @@
         // Llamar a la función al cargar la página
         window.onload = preventBack;
 </script>
+
+
+
+
+
+
+
+
+
+
+
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #alert {
+            background-color: #e63946;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="modal">
+        <div id="alert">¡No hay conexión a Internet!</div>
+    </div>
+
+    <script>
+        function updateConnectionStatus() {
+            const modal = document.getElementById('modal');
+            if (navigator.onLine) {
+                modal.style.display = 'none'; // Ocultar modal si hay conexión
+            } else {
+                modal.style.display = 'flex'; // Mostrar modal si no hay conexión
+            }
+        }
+
+        // Detectar cambios en la conexión
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Verificar estado inicial de conexión
+        updateConnectionStatus();
+    </script>
+</body>
+</html>
+
