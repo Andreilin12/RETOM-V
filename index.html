@@ -109,3 +109,66 @@
 
 </body>
 </html>
+
+
+
+
+
+    <style>
+        .content {
+            text-align: center;
+            display: none; /* Ocultamos el contenido por defecto */
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #00e5ff;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        img {
+            width: 150px;
+            height: auto;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content" id="no-internet">
+        <img src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/RETOM%20COMPLETO%20(2).png?alt=media&token=bcb475a5-edf6-494a-96e5-ca8f0a8ae005" alt="Sin conexión a Internet">
+        <h1>Sin Conexión</h1>
+        <p>No tienes acceso a Internet. Verifica tu conexión y vuelve a intentarlo.</p>
+    </div>
+
+    <script>
+        function checkConnection() { 
+            const content = document.getElementById('no-internet'); 
+            
+            if (navigator.onLine) {
+                // Si está online, ocultamos el mensaje
+                content.style.display = 'none';
+            } else {
+                // Si está offline, mostramos el mensaje
+                content.style.display = 'block';
+            }
+        }
+
+        // Verificamos la conexión cuando se cargue la página
+        window.addEventListener('load', checkConnection);
+
+        // Escuchamos los eventos de conexión y desconexión
+        window.addEventListener('online', checkConnection);
+        window.addEventListener('offline', checkConnection);
+    </script>
+</body>
+
+
