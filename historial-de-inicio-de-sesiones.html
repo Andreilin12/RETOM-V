@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Inicios de Sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 90%;
+            max-width: 1200px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: #16a085;
+        }
+        .filters {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .filters input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .filters input:focus {
+            border-color: #16a085;
+            box-shadow: 0 0 10px rgba(22, 160, 133, 0.5);
+            outline: none;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .history-table th, .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .history-table th {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #16a085;
+        }
+        .history-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .loading i {
+            font-size: 24px;
+            color: #16a085;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Historial de Inicios de Sesión</h1>
+    <div class="filters">
+        <input type="text" id="searchByName" placeholder="Buscar por nombre...">
+        <input type="date" id="searchByDate">
+    </div>
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Fecha y Hora</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody">
+            <!-- Aquí se cargarán los datos -->
+        </tbody>
+    </table>
+    <div class="loading" id="loading">
+        <i class="fas fa-spinner"></i>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, query, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    const historyBody = document.getElementById('historyBody');
+    const searchByName = document.getElementById('searchByName');
+    const searchByDate = document.getElementById('searchByDate');
+    const loading = document.getElementById('loading');
+
+    // Cargar historial inicial
+    loadHistory();
+
+    // Función para cargar el historial
+    function loadHistory(filterName = '', filterDate = '') {
+        loading.style.display = 'block';
+        historyBody.innerHTML = '';
+
+        let q = query(collection(firestore, "loginHistory"));
+
+        if (filterName) {
+            q = query(q, where("userName", ">=", filterName), where("userName", "<=", filterName + "\uf8ff"));
+        }
+        if (filterDate) {
+            const startDate = new Date(filterDate);
+            const endDate = new Date(filterDate);
+            endDate.setDate(endDate.getDate() + 1);
+            q = query(q, where("loginTime", ">=", startDate.toISOString()), where("loginTime", "<", endDate.toISOString()));
+        }
+
+        onSnapshot(q, (snapshot) => {
+            historyBody.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.userName}</td>
+                    <td>${new Date(data.loginTime).toLocaleString()}</td>
+                `;
+                historyBody.appendChild(row);
+            });
+            loading.style.display = 'none';
+        });
+    }
+
+    // Buscar por nombre
+    searchByName.addEventListener('input', () => {
+        loadHistory(searchByName.value, searchByDate.value);
+    });
+
+    // Buscar por fecha
+    searchByDate.addEventListener('change', () => {
+        loadHistory(searchByName.value, searchByDate.value);
+    });
+</script>
+
+</body>
+</html>
