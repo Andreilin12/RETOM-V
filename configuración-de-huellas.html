@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Llave de Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 20px;
+        }
+        .login-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .btn {
+            background-color: #16a085;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #12876f;
+            transform: translateY(-2px);
+        }
+        .alert {
+            display: none;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            color: white;
+            animation: fadeIn 0.5s;
+        }
+        .alert.error {
+            background-color: #e63946;
+        }
+        .alert.success {
+            background-color: #2a9d8f;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        .loading i {
+            font-size: 24px;
+            color: #16a085;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h3>Registrar Llave de Acceso</h3>
+    <button type="button" class="btn" id="registerPasskey">Registrar Llave de Acceso</button>
+    <div id="alertMessage" class="alert"></div>
+    <div class="loading" id="loading">
+        <i class="fas fa-spinner"></i>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+
+    // Verificar si el usuario está autenticado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Usuario autenticado:", user.email);
+        } else {
+            showAlert('Por favor, inicia sesión para registrar una llave de acceso.', 'error');
+        }
+    });
+
+    // Registrar una nueva llave de acceso
+    document.getElementById('registerPasskey').addEventListener('click', async () => {
+        if (!navigator.credentials || !navigator.credentials.create) {
+            showAlert('La creación de llaves de acceso no es compatible con este navegador.', 'error');
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            showAlert('Por favor, inicia sesión para registrar una llave de acceso.', 'error');
+            return;
+        }
+
+        try {
+            // Generar un desafío único
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            // Opciones para crear la llave de acceso
+            const publicKeyCredentialCreationOptions = {
+                challenge: challenge,
+                rp: {
+                    name: "Retom Inventario",
+                    id: window.location.hostname // Dominio de la aplicación
+                },
+                user: {
+                    id: new Uint8Array(16), // ID único del usuario
+                    name: user.email,
+                    displayName: user.email
+                },
+                pubKeyCredParams: [
+                    { type: "public-key", alg: -7 }, // ES256
+                    { type: "public-key", alg: -257 } // RS256
+                ],
+                authenticatorSelection: {
+                    authenticatorAttachment: "platform", // "platform" para dispositivos integrados
+                    userVerification: "required" // Requiere verificación del usuario (huella, rostro, etc.)
+                },
+                timeout: 60000, // Tiempo de espera en milisegundos
+                attestation: "direct" // Tipo de atestación
+            };
+
+            // Crear la llave de acceso
+            const credential = await navigator.credentials.create({
+                publicKey: publicKeyCredentialCreationOptions
+            });
+
+            // Convertir la credencial a un formato almacenable
+            const credentialData = {
+                id: credential.id,
+                rawId: Array.from(new Uint8Array(credential.rawId)),
+                type: credential.type,
+                response: {
+                    attestationObject: Array.from(new Uint8Array(credential.response.attestationObject)),
+                    clientDataJSON: Array.from(new Uint8Array(credential.response.clientDataJSON))
+                }
+            };
+
+            // Guardar la credencial en Firestore
+            await addDoc(collection(firestore, "passkeys"), {
+                userId: user.uid,
+                email: user.email,
+                credential: credentialData,
+                createdAt: new Date().toISOString()
+            });
+
+            showAlert('Llave de acceso registrada exitosamente.', 'success');
+        } catch (error) {
+            console.error('Error al crear la llave de acceso:', error);
+            showAlert('Error al crear la llave de acceso. Por favor, intenta de nuevo.', 'error');
+        }
+    });
+
+    // Función para mostrar alertas
+    function showAlert(message, type) {
+        const alertMessage = document.getElementById('alertMessage');
+        alertMessage.textContent = message;
+        alertMessage.className = `alert ${type}`;
+        alertMessage.style.display = 'block';
+        setTimeout(() => {
+            alertMessage.style.display = 'none';
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
