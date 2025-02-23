@@ -88,6 +88,19 @@
             background-color: #12876f;
             transform: translateY(-2px);
         }
+        .btn-icon {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #16a085;
+            margin-top: 20px;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .btn-icon:hover {
+            color: #12876f;
+            transform: scale(1.1);
+        }
         .alert {
             display: none;
             padding: 12px;
@@ -149,17 +162,19 @@
         </div>
         <button type="submit" class="btn">Iniciar Sesión</button>
     </form>
+    <button type="button" class="btn-icon" id="biometricLogin" title="Iniciar Sesión con Huella">
+        <i class="fas fa-fingerprint"></i>
+    </button>
     <div id="alertMessage" class="alert"></div>
     <div class="loading" id="loading">
         <i class="fas fa-spinner"></i>
     </div>
-    
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -175,40 +190,89 @@
     const auth = getAuth(app);
     const firestore = getFirestore(app);
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const rememberMe = document.getElementById('rememberMe').checked;
-
-        // Mostrar loading
-        document.getElementById('loading').style.display = 'block';
-
-        try {
-            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Guardar historial en Firestore
-            const loginTime = new Date().toISOString();
-            await addDoc(collection(firestore, "loginHistory"), {
-                userName: user.email,
-                loginTime: loginTime
-            });
-
-            showAlert('Inicio de sesión exitoso', 'success');
-            setTimeout(() => {
-                window.location.href = "app-home.html";
-            }, 2000);
-        } catch (error) {
-            console.error('Error de autenticación:', error.message);
-            showAlert('Error de autenticación. Por favor, revisa tus credenciales.', 'error');
-        } finally {
-            // Ocultar loading
-            document.getElementById('loading').style.display = 'none';
+    // Verificar si el usuario está autenticado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Usuario autenticado:", user.email);
+        } else {
+            showAlert('Por favor, inicia sesión para registrar una llave de acceso.', 'error');
         }
     });
 
+    // Registrar una nueva llave de acceso
+    document.getElementById('biometricLogin').addEventListener('click', async () => {
+        if (!navigator.credentials || !navigator.credentials.get) {
+            showAlert('La autenticación biométrica no es compatible con este navegador.', 'error');
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            showAlert('Por favor, inicia sesión para usar la autenticación biométrica.', 'error');
+            return;
+        }
+
+        try {
+            // Obtener la llave de acceso registrada del usuario desde Firestore
+            const q = query(collection(firestore, "passkeys"), where("userId", "==", user.uid));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                showAlert('No se encontró una llave de acceso registrada.', 'error');
+                return;
+            }
+
+            const passkeyDoc = querySnapshot.docs[0].data();
+            const credentialId = Uint8Array.from(passkeyDoc.credential.rawId);
+
+            // Opciones para recuperar la llave de acceso
+            const publicKeyCredentialRequestOptions = {
+                challenge: new Uint8Array(32), // Desafío único
+                allowCredentials: [{
+                    type: "public-key",
+                    id: credentialId,
+                    transports: ["internal"]
+                }],
+                userVerification: "required" // Requiere verificación del usuario (huella, rostro, etc.)
+            };
+
+            // Recuperar la llave de acceso
+            const assertion = await navigator.credentials.get({
+                publicKey: publicKeyCredentialRequestOptions
+            });
+
+            // Verificar la aserción en el servidor (simulado aquí)
+            const isValid = await verifyAssertionOnServer(assertion);
+
+            if (isValid) {
+                showAlert('Autenticación biométrica exitosa', 'success');
+                setTimeout(() => {
+                    window.location.href = "app-home.html";
+                }, 2000);
+            } else {
+                showAlert('Error en la autenticación biométrica.', 'error');
+            }
+        } catch (error) {
+            console.error('Error en la autenticación biométrica:', error);
+            showAlert('Error en la autenticación biométrica. Por favor, intenta de nuevo.', 'error');
+        }
+    });
+
+    // Función para verificar la aserción en el servidor (simulada)
+    async function verifyAssertionOnServer(assertion) {
+        // Aquí debes enviar la aserción a tu servidor para su verificación
+        // Por ejemplo, usando una API REST o GraphQL
+        // El servidor debe comparar la aserción con la clave pública almacenada
+
+        // Simulación de una respuesta del servidor
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(true); // Simula una verificación exitosa
+            }, 1000);
+        });
+    }
+
+    // Función para mostrar alertas
     function showAlert(message, type) {
         const alertMessage = document.getElementById('alertMessage');
         alertMessage.textContent = message;
