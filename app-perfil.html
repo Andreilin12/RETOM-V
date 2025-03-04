@@ -37,6 +37,7 @@
       cursor: pointer;
       font-size: 24px;
       transition: color 0.3s;
+      margin: 0 10px; /* Espaciado para los iconos */
     }
     .info-button:hover, .logout-button:hover {
       color: #e74c3c;
@@ -51,6 +52,7 @@
       margin: 20px;
       text-align: center;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      box-sizing: border-box;
     }
     h1, h2 {
       color: #fff;
@@ -67,6 +69,7 @@
       object-fit: cover;
       border: 4px solid #16a085;
       transition: transform 0.3s;
+      cursor: pointer;
     }
     #usuarioFoto:hover {
       transform: scale(1.1);
@@ -182,6 +185,18 @@
       border-radius: 4px;
       font-size: 16px;
     }
+    .profile-photo-square {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+    .expanded-photo {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -192,7 +207,7 @@
   </header>
   <div class="container">
     <div class="profile-container">
-      <img id="usuarioFoto" alt="Foto de perfil" src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727">
+      <img id="usuarioFoto" alt="Foto de perfil" src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/SIN%20FOTO%20DE%20PERFIL.png?alt=media&token=2e8c3d69-e0ae-47ec-89e0-f314ea58f727" onclick="mostrarModalFoto()">
       <i class="fas fa-image edit-icon" onclick="editarFoto()"></i>
       <input type="file" id="archivoFoto" style="display: none;" accept="image/*" onchange="subirFoto(event)">
     </div>
@@ -239,13 +254,20 @@
     <div class="modal-content">
       <span class="close" onclick="cerrarModalInfo()">×</span>
       <h2>Información del Usuario</h2>
-      <p><strong>Fecha de Creación:</strong> <span id="fechaCreacion"></span></p>
-      <p><strong>Nombre de Usuario:</strong> <span id="infoNombreUsuario"></span></p>
-      <p><strong>Cambios de Contraseña:</strong> <span id="cambiosContrasena"></span></p>
-      <p><strong>Cambios de Nombre:</strong> <span id="cambiosNombre"></span></p>
-      <p><strong>Cambios de Foto:</strong> <span id="cambiosFoto"></span></p>
-      <p><strong>Dispositivo Actual:</strong> <span id="dispositivoActual"></span></p>
-      <p><strong>Batería:</strong> <span id="porcentajeBateria"></span></p>
+      <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <img id="infoUsuarioFoto" alt="Foto de perfil" src="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid #16a085;">
+      </div>
+      <p><strong>Nombre:</strong> <span id="infoNombreUsuario"></span></p>
+      <p><strong>Correo:</strong> <span id="infoCorreoUsuario"></span></p>
+      <p><strong>Contraseña:</strong> <span id="infoContrasenaUsuario"></span></p>
+    </div>
+  </div>
+
+  <!-- Modal de Foto Expandida -->
+  <div id="modalFoto" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModalFoto()">×</span>
+      <img id="fotoExpandida" alt="Foto de perfil expandida" src="" style="width: 100%; border-radius: 8px;">
     </div>
   </div>
 
@@ -284,17 +306,14 @@
           document.getElementById('usuarioCorreo').textContent = user.email || 'Correo no disponible';
           if (userData.photoURL || user.photoURL) {
             document.getElementById('usuarioFoto').src = userData.photoURL || user.photoURL;
+            document.getElementById('infoUsuarioFoto').src = userData.photoURL || user.photoURL;
           }
-          // Cargar información adicional
-          document.getElementById('fechaCreacion').textContent = userData.creationTime || 'No disponible';
+          // Mostrar contraseña en formato J******7
+          const password = userData.password || '********';
+          const maskedPassword = password.charAt(0) + '*'.repeat(password.length - 2) + password.charAt(password.length - 1);
+          document.getElementById('infoContrasenaUsuario').textContent = maskedPassword;
           document.getElementById('infoNombreUsuario').textContent = userData.name || user.displayName || 'Usuario';
-          document.getElementById('cambiosContrasena').textContent = userData.passwordChanges || 0;
-          document.getElementById('cambiosNombre').textContent = userData.nameChanges || 0;
-          document.getElementById('cambiosFoto').textContent = userData.photoChanges || 0;
-          document.getElementById('dispositivoActual').textContent = navigator.userAgent;
-          navigator.getBattery().then(battery => {
-            document.getElementById('porcentajeBateria').textContent = `${Math.round(battery.level * 100)}%`;
-          });
+          document.getElementById('infoCorreoUsuario').textContent = user.email || 'Correo no disponible';
         }
       }
     });
@@ -380,6 +399,18 @@
       document.getElementById('modalInfo').style.display = 'none';
     };
 
+    // Función para mostrar el modal de foto expandida
+    window.mostrarModalFoto = function() {
+      const foto = document.getElementById('usuarioFoto').src;
+      document.getElementById('fotoExpandida').src = foto;
+      document.getElementById('modalFoto').style.display = 'flex';
+    };
+
+    // Función para cerrar el modal de foto expandida
+    window.cerrarModalFoto = function() {
+      document.getElementById('modalFoto').style.display = 'none';
+    };
+
     // Función para subir foto de perfil
     window.subirFoto = async function(event) {
       const archivo = event.target.files[0];
@@ -395,6 +426,7 @@
               const userDocRef = doc(db, "users", user.uid);
               await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
               document.getElementById('usuarioFoto').src = downloadURL;
+              document.getElementById('infoUsuarioFoto').src = downloadURL;
               mostrarAlerta('Foto de perfil actualizada correctamente.', 'success');
             }).catch((error) => {
               mostrarAlerta('Error al actualizar la foto de perfil.', 'error');
